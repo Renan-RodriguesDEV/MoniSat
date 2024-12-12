@@ -4,7 +4,7 @@ import os
 import logging
 from time import sleep
 
-from uteis import load_page
+from uteis import load_page, wait_load_elements
 
 load_dotenv()
 
@@ -45,7 +45,7 @@ ch.setFormatter(CustomFormatter())
 logger.addHandler(ch)
 
 
-class MoniSAT:
+class GridMoniSAT:
     def __init__(self):
         # Verificar se as variáveis de ambiente existem
         required_env_vars = ["GERAL", "LOGIN", "SENHA"]
@@ -195,10 +195,7 @@ class MoniSAT:
         div_list = self.page_monisat.locator(div_list_element)
         processing_selector = "#tableGridGeral_processing"
         if div_list:
-            self.page_monisat.wait_for_function(
-                f"() => getComputedStyle(document.querySelector('{processing_selector}')).display === 'none'",
-                timeout=60_000,
-            )
+            wait_load_elements(self.page_monisat, processing_selector)
 
             logger.info("Tabela carregada completamente!")
             screenshot_path = os.path.join(os.getcwd(), "cards", f"LISTA_GRID.png")
@@ -217,7 +214,7 @@ class MoniSAT:
 
 
 if __name__ == "__main__":
-    handler = MoniSAT()
+    handler = GridMoniSAT()
     parametros = {}
     try:
         handler.extrator_to_grid(map_=False, list_results=True)

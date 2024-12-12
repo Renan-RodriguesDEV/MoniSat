@@ -19,3 +19,10 @@ def load_page(page, scroll_pause_time=2.5):
             break  # Se a altura não mudou, encerra a rolagem
 
         previous_height = new_height  # Atualiza a altura para a próxima iteração
+
+
+def wait_load_elements(page, selector, timeout=40000):
+    page.wait_for_function(
+        f"() => getComputedStyle(document.querySelector('{selector}')).display === 'none'",
+        timeout=timeout,
+    )
