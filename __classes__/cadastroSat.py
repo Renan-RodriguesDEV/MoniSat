@@ -22,6 +22,19 @@ class CadMoniSAT(MoniSat):
     def __init__(self):
         super().__init__()
 
+    def option_select_for_logistic(self):
+        self.page_monisat.pause()
+
+        chevron_selector = "#navigation > ul > li:nth-child(3) > a > i.fas.fa-edit"
+        self.page_monisat.hover(chevron_selector)  # Passar o mouse
+        self.page_monisat.click(chevron_selector)  # Clicar no dropdown
+        sleep(1)
+        option = self.page_monisat.query_selector(
+            "#navigation > ul > li:nth-child(3) > ul > li.has-submenu > a"
+        )
+        option.click()  # Clicar na opção do menu
+        option.hover()
+
     def get_options(
         self,
         params_driver=None,
@@ -39,7 +52,6 @@ class CadMoniSAT(MoniSat):
         cliente_points=False,
         cadastrar_rotograma=False,
         rotas_alternativas=False,
-        cadastrar_logistica=False,
     ):
         # Parâmetros com valores padrão vazios, caso não sejam passados
         params_driver = params_driver or {}
@@ -72,7 +84,7 @@ class CadMoniSAT(MoniSat):
                     cadastrar_driver,
                 )
                 if params_driver
-                else self.fill_driver()
+                else None
             ),
             "Veículo": lambda: (
                 self.fill_car(
@@ -92,7 +104,7 @@ class CadMoniSAT(MoniSat):
                     cadastrar_car,
                 )
                 if params_car
-                else self.fill_car()
+                else None
             ),
             "Reboque": lambda: (
                 self.fill_reboque(
@@ -108,7 +120,7 @@ class CadMoniSAT(MoniSat):
                     cadastrar_reboque,
                 )
                 if params_reboque
-                else self.fill_reboque()
+                else None
             ),
             "Isca/Redundante": lambda: (
                 self.fill_iscas(
@@ -122,7 +134,7 @@ class CadMoniSAT(MoniSat):
                     cadastrar_iscas,
                 )
                 if params_iscas
-                else self.fill_iscas()
+                else None
             ),
             "Pontos": lambda: (
                 self.fill_pontos(
@@ -135,7 +147,7 @@ class CadMoniSAT(MoniSat):
                     cadastrar_pontos,
                 )
                 if params_pontos
-                else self.fill_pontos()
+                else None
             ),
             "Rotograma": lambda: (
                 self.fill_retrograma(
@@ -148,10 +160,15 @@ class CadMoniSAT(MoniSat):
                     cadastrar_rotograma,
                 )
                 if params_rotograma
-                else self.fill_retrograma()
+                else None
             ),
             "Logística": lambda: (
-                self.fill_logistica(params_logistica)
+                self.fill_logistica(
+                    params_logistica.get("args_viagem", ""),
+                    params_logistica.get("args_veiculo", ""),
+                    params_logistica.get("args_gestor", ""),
+                    params_logistica.get("args_reboque", ""),
+                )
                 if params_logistica
                 else self.fill_logistica()
             ),
@@ -170,6 +187,8 @@ class CadMoniSAT(MoniSat):
                 sleep(1)
 
                 option.click()  # Clicar na opção do menu
+                if option_text == "Logística":
+                    option.hover()
                 if (
                     option_text in dict_func and dict_func[option_text]
                 ):  # Executa apenas se a função não for None
@@ -312,7 +331,7 @@ class CadMoniSAT(MoniSat):
         tipo="",
         raio="",
         cliente_points=False,
-        mapa=False,
+        mapa=True,
         cadastrar=False,
     ):
         data_cadastro = {
@@ -330,20 +349,11 @@ class CadMoniSAT(MoniSat):
             "raio": "#tablePonto > thead > tr > th:nth-child(6) > center > input",
         }
         btn_pontos = "#conteudoPagina > div > div > div > div > div > div.float-right > a:nth-child(1) > button"
-        btn_cadastro = "#conteudoPagina > div > div > div > div > div > div.float-right > a:nth-child(2) > button"
         maximize_minimize = "#mapPonto > div.leaflet-control-container > div.leaflet-top.leaflet-left > div.leaflet-control-fullscreen.leaflet-bar.leaflet-control > a"
         mapa_selector = "#mapPonto"
 
         if cliente_points:
             self.page_monisat.click(btn_pontos)
-
-        if mapa:
-            self.page_monisat.click(maximize_minimize)
-            self.page_monisat.wait_for_load_state("networkidle", timeout=30000)
-            self.page_monisat.wait_for_selector(mapa_selector)
-            card = self.page_monisat.query_selector(mapa_selector)
-            card.screenshot(path=os.path.join(self.path_cards, "MAPA_PONTOS.png"))
-            self.page_monisat.click(maximize_minimize)
 
         # Selecionar a opção "Todos"
         select_selector = 'select[name="tablePonto_length"]'
@@ -352,13 +362,23 @@ class CadMoniSAT(MoniSat):
         self.page_monisat.select_option(select_selector, value="-1")
         logger.info("Selecionada a opção 'Todos' no campo select.")
 
+        if mapa:
+            self.page_monisat.click(maximize_minimize)
+            self.page_monisat.wait_for_load_state("networkidle", timeout=30000)
+            self.page_monisat.wait_for_selector(mapa_selector)
+            mapa_element = self.page_monisat.query_selector(mapa_selector)
+            mapa_element.screenshot(
+                path=os.path.join(self.path_cards, "MAPA_PONTOS.png")
+            )
+            self.page_monisat.click(maximize_minimize)
+
         for key, value in data_cadastro.items():
             self.page_monisat.fill(selectors[key], value)
         # carrega a tabela por completa
         load_page(self.page_monisat)
         wait_load_elements(self.page_monisat, "#tablePonto_processing")
         self.page_monisat.wait_for_load_state("networkidle", timeout=30000)
-        card = self.page_monisat.query_selector(".dataTables_scroll")
+        card = self.page_monisat.query_selector("#tablePonto")
         card.screenshot(path=os.path.join(self.path_cards, "TABLE_PONTOS.png"))
         if cadastrar:
             logger.info("Cadastrando pontos...")
@@ -420,23 +440,27 @@ class CadMoniSAT(MoniSat):
     ):
         situacao_viagem(
             self.page_monisat,
-            os.path.join(self.path_cards, "SITUACAO_VIAGEM.png"),
+            os.path.join(self.path_cards, "LOGISTICA_SITUACAO_VIAGEM.png"),
             args_viagem,
         )
+        self.option_select_for_logistic()
         situacao_veiculo(
             self.page_monisat,
-            os.path.join(self.path_cards, "SITUACAO_VEICULO.png"),
-            args_veiculo.get("pesquisa"),args_veiculo.get("cadatro")
+            os.path.join(self.path_cards, "LOGISTICA_SITUACAO_VEICULO.png"),
+            args_veiculo.get("pesquisa"),
+            args_veiculo.get("cadatro"),
         )
+        self.option_select_for_logistic()
         c_gestor(
             self.page_monisat,
-            os.path.join(self.path_cards, "C_GESTOR.png"),
+            os.path.join(self.path_cards, "LOGISTICA_C_GESTOR.png"),
             args_gestor.get("pesquisa"),
             args_gestor.get("cadastro"),
         )
+        self.option_select_for_logistic()
         c_reboque(
             self.page_monisat,
-            os.path.join(self.path_cards, "C_REBOQUE.png"),
+            os.path.join(self.path_cards, "LOGISTICA_C_REBOQUE.png"),
             args_reboque.get("pesquisa"),
             args_reboque.get("cadastro"),
         )
