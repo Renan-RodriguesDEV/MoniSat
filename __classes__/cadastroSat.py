@@ -3,10 +3,15 @@ from dotenv import load_dotenv
 import os
 from SuperClassMoni import CustomFormatter, MoniSat, ch, logger
 from time import sleep
-
+from logistica import (
+    c_gestor,
+    c_reboque,
+    cad_driver,
+    cad_veiculo,
+    situacao_veiculo,
+    situacao_viagem,
+)
 from uteis import load_page, wait_load_elements
-
-load_dotenv()
 
 
 ch.setFormatter(CustomFormatter())
@@ -146,9 +151,9 @@ class CadMoniSAT(MoniSat):
                 else self.fill_retrograma()
             ),
             "Logística": lambda: (
-                self.logistica(params_logistica)
+                self.fill_logistica(params_logistica)
                 if params_logistica
-                else self.logistica()
+                else self.fill_logistica()
             ),
         }
 
@@ -406,8 +411,35 @@ class CadMoniSAT(MoniSat):
         if cadastrar:
             logger.info("Cadastrando retrogrma...")
 
-    def logistica(self, **kwargs):
-        pass
+    def fill_logistica(
+        self,
+        args_viagem=False,
+        args_veiculo={"pesquisa": "", "cadastro": {"descricao": "", "cor": "Preto"}},
+        args_gestor={"pesquisa": "", "cadastro": {"descricao": "", "cor": "Preto"}},
+        args_reboque={"pesquisa": "", "cadastro": {"descricao": "", "cor": "Preto"}},
+    ):
+        situacao_viagem(
+            self.page_monisat,
+            os.path.join(self.path_cards, "SITUACAO_VIAGEM.png"),
+            args_viagem,
+        )
+        situacao_veiculo(
+            self.page_monisat,
+            os.path.join(self.path_cards, "SITUACAO_VEICULO.png"),
+            args_veiculo.get("pesquisa"),args_veiculo.get("cadatro")
+        )
+        c_gestor(
+            self.page_monisat,
+            os.path.join(self.path_cards, "C_GESTOR.png"),
+            args_gestor.get("pesquisa"),
+            args_gestor.get("cadastro"),
+        )
+        c_reboque(
+            self.page_monisat,
+            os.path.join(self.path_cards, "C_REBOQUE.png"),
+            args_reboque.get("pesquisa"),
+            args_reboque.get("cadastro"),
+        )
 
     def fill_car(
         self,
@@ -476,11 +508,7 @@ class CadMoniSAT(MoniSat):
         card = self.page_monisat.query_selector(".dataTables_scroll")
         card.screenshot(path=os.path.join(self.path_cards, "TABLE_CARS.png"))
         if cadastrar:
-            save_selector = "#cadastrarveiculobtn"
-            self.page_monisat.click(
-                "#conteudoPagina > div > div > div > div > div > div.float-right > a > button"
-            )
-            self.page_monisat.click(save_selector)
+            cad_veiculo(self.page_monisat, placa)
 
     def fill_driver(
         self,
@@ -540,11 +568,7 @@ class CadMoniSAT(MoniSat):
 
         card.screenshot(path=os.path.join(self.path_cards, "TABLE_MOTORISTA.png"))
         if cadastrar:
-            save_selector = "#cadastrarmotoristabtn"
-            self.page_monisat.click(
-                "#conteudoPagina > div > div > div > div > div > div.float-right > a > button"
-            )
-            self.page_monisat.click(save_selector)
+            cad_driver(self.page_monisat, cpf)
 
 
 if __name__ == "__main__":
