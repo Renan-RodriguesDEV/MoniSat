@@ -1,130 +1,21 @@
 from playwright.sync_api import sync_playwright
 from dotenv import load_dotenv
 import os
-import logging
+from SuperClassMoni import CustomFormatter, MoniSat, ch, logger
 from time import sleep
 
 from uteis import load_page, wait_load_elements
 
 load_dotenv()
 
-# create logger with 'spam_application'
-logger = logging.getLogger("scrapper")
-logger.setLevel(logging.DEBUG)
-
-# create console handler with a higher log level
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-
-
-class CustomFormatter(logging.Formatter):
-    grey = "\x1b[38;20m"
-    yellow = "\x1b[33;20m"
-    red = "\x1b[31;20m"
-    bold_red = "\x1b[31;1m"
-    reset = "\x1b[0m"
-    format = (
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
-    )
-
-    FORMATS = {
-        logging.DEBUG: grey + format + reset,
-        logging.INFO: grey + format + reset,
-        logging.WARNING: yellow + format + reset,
-        logging.ERROR: red + format + reset,
-        logging.CRITICAL: bold_red + format + reset,
-    }
-
-    def format(self, record):
-        log_fmt = self.FORMATS.get(record.levelno)
-        formatter = logging.Formatter(log_fmt)
-        return formatter.format(record)
-
 
 ch.setFormatter(CustomFormatter())
 logger.addHandler(ch)
 
 
-class CadMoniSAT:
+class CadMoniSAT(MoniSat):
     def __init__(self):
-        # Verificar se as variáveis de ambiente existem
-        required_env_vars = ["GERAL", "LOGIN", "SENHA"]
-        for var in required_env_vars:
-            if not os.getenv(var):
-                logger.error(f"Variável de ambiente {var} não encontrada")
-                raise ValueError(f"Variável de ambiente {var} não configurada")
-
-        self.user_geral = os.getenv("GERAL")
-        self.user_login = os.getenv("LOGIN")
-        self.senha = os.getenv("SENHA")
-        self.browser = None
-        self.path_cards = os.path.join(os.getcwd(), "cards")
-
-        try:
-            app_data_path = os.getenv("LOCALAPPDATA")
-            user_data_path = os.path.join(
-                app_data_path, r"Google\Chrome\User Data\Default\Google Profile"
-            )
-
-            logger.info(f"AppData: {app_data_path}")
-            # Criar diretório para screenshots se não existir
-            os.makedirs(os.path.join(os.getcwd(), "cards"), exist_ok=True)
-
-            # Iniciar o playwright
-            self.playwright = sync_playwright().start()
-            # self.browser = self.playwright.chromium.launch()
-            self.browser = self.playwright.chromium.launch_persistent_context(
-                user_data_path,
-                headless=False,
-                args=["--start-maximized"],
-                no_viewport=True,
-                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.81",
-            )
-
-            self.url = "https://site.monisat.com.br/index.php"
-            logger.debug("Classe iniciada com sucesso.")
-        except Exception as e:
-            logger.error(f"Erro ao inicializar: {str(e)}")
-            self.fechar()
-            raise
-
-    def login(self):
-        try:
-            logger.debug("Iniciando extração.")
-            self.page_monisat = self.browser.new_page()
-
-            # Adicionar timeout para carregamento da página
-            self.page_monisat.goto(self.url, timeout=30000)
-            self.page_monisat.wait_for_load_state("networkidle", timeout=30000)
-
-            # Verificar se os elementos de login existem
-            selectors = {
-                "empresa": 'input[name="userEmpresa"]',
-                "usuario": 'input[name="username"]',
-                "senha": 'input[name="userpassword"]',
-                "submit": 'button[type="submit"]',
-            }
-
-            for name, selector in selectors.items():
-                if not self.page_monisat.query_selector(selector):
-                    raise Exception(f"Elemento {name} não encontrado na página")
-
-            logger.info("Página carregada.")
-
-            logger.info("Preenchendo login.")
-            self.page_monisat.fill('input[name="userEmpresa"]', self.user_geral)
-            self.page_monisat.fill('input[name="username"]', self.user_login)
-            self.page_monisat.fill('input[name="userpassword"]', self.senha)
-            self.page_monisat.click('button[type="submit"]')
-            sleep(3)
-
-            self.page_monisat.wait_for_load_state("networkidle")
-            logger.info("Login efetuado.")
-
-        except Exception as e:
-            logger.error(f"Erro durante a extração: {str(e)}")
-            self.fechar()
-            raise
+        super().__init__()
 
     def get_options(
         self,
@@ -140,7 +31,9 @@ class CadMoniSAT:
         cadastrar_reboque=False,
         cadastrar_iscas=False,
         cadastrar_pontos=False,
+        cliente_points=False,
         cadastrar_rotograma=False,
+        rotas_alternativas=False,
         cadastrar_logistica=False,
     ):
         # Parâmetros com valores padrão vazios, caso não sejam passados
@@ -167,10 +60,10 @@ class CadMoniSAT:
                     params_driver.get("cnh", ""),
                     params_driver.get("tipo", ""),
                     params_driver.get("pussoui_pass", ""),
-                    params_car.get("consulta", ""),
-                    params_car.get("validade", ""),
-                    params_car.get("status", ""),
-                    params_car.get("referencia", ""),
+                    params_driver.get("consulta", ""),
+                    params_driver.get("validade", ""),
+                    params_driver.get("status", ""),
+                    params_driver.get("referencia", ""),
                     cadastrar_driver,
                 )
                 if params_driver
@@ -183,30 +76,79 @@ class CadMoniSAT:
                     params_car.get("tipo", ""),
                     params_car.get("categoria", ""),
                     params_car.get("rastreador", ""),
+                    params_car.get("n_antena", ""),
+                    params_car.get("semi_reboque", ""),
+                    params_car.get("motorista", ""),
+                    params_car.get("operacao", ""),
+                    params_car.get("consulta", ""),
+                    params_car.get("validade", ""),
+                    params_car.get("status", ""),
+                    params_car.get("referencia", ""),
+                    cadastrar_car,
                 )
                 if params_car
                 else self.fill_car()
             ),
             "Reboque": lambda: (
-                self.fill_reboque(params_reboque)
+                self.fill_reboque(
+                    params_reboque.get("placa_reboque", ""),
+                    params_reboque.get("chassi", ""),
+                    params_reboque.get("renavam", ""),
+                    params_reboque.get("subcategoria", ""),
+                    params_reboque.get("marca", ""),
+                    params_reboque.get("consulta", ""),
+                    params_reboque.get("validade", ""),
+                    params_reboque.get("status", ""),
+                    params_reboque.get("referencia", ""),
+                    cadastrar_reboque,
+                )
                 if params_reboque
                 else self.fill_reboque()
             ),
             "Isca/Redundante": lambda: (
-                self.fill_iscas(params_iscas) if params_iscas else self.fill_iscas()
+                self.fill_iscas(
+                    params_iscas.get("nome", ""),
+                    params_iscas.get("marca", ""),
+                    params_iscas.get("site", ""),
+                    params_iscas.get("telefone", ""),
+                    params_iscas.get("login", ""),
+                    params_iscas.get("senha", ""),
+                    params_iscas.get("obs", ""),
+                    cadastrar_iscas,
+                )
+                if params_iscas
+                else self.fill_iscas()
             ),
             "Pontos": lambda: (
-                self.fill_pontos(params_pontos) if params_pontos else self.fill_pontos()
+                self.fill_pontos(
+                    params_pontos.get("ponto", ""),
+                    params_pontos.get("cidade", ""),
+                    params_pontos.get("cnpj", ""),
+                    params_pontos.get("tipo", ""),
+                    params_pontos.get("raio", ""),
+                    cliente_points,
+                    cadastrar_pontos,
+                )
+                if params_pontos
+                else self.fill_pontos()
             ),
             "Rotograma": lambda: (
-                self.fill_rotograma(params_rotograma)
+                self.fill_retrograma(
+                    params_rotograma.get("id", ""),
+                    params_rotograma.get("retrograma", ""),
+                    params_rotograma.get("distancia", ""),
+                    params_rotograma.get("criado_por", ""),
+                    params_rotograma.get("data_hora", ""),
+                    rotas_alternativas,
+                    cadastrar_rotograma,
+                )
                 if params_rotograma
-                else self.fill_retrotograma()
+                else self.fill_retrograma()
             ),
             "Logística": lambda: (
-                self.fill_logistica(params_logistica)
+                self.logistica(params_logistica)
                 if params_logistica
-                else self.fill_logistica()
+                else self.logistica()
             ),
         }
 
@@ -249,17 +191,224 @@ class CadMoniSAT:
         validade="",
         status="",
         referencia="",
-    ): ...
+        cadastrar=False,
+    ):
+        data_cadastro = {
+            "placa_reboque": placa_reboque,
+            "chassi": chassi,
+            "renavam": renavam,
+            "subcategoria": subcategoria,
+            "marca": marca,
+            "consulta": consulta,
+            "validade": validade,
+            "status": status,
+            "referencia": referencia,
+        }
+        selectors = {
+            "placa_reboque": "#tablesemreb_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th.sorting_asc > center > input",
+            "chassi": "#tablesemreb_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(2) > center > input",
+            "renavam": "#tablesemreb_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(3) > center > input",
+            "subcategoria": "#tablesemreb_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(4) > center > input",
+            "marca": "#tablesemreb_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(5) > center > input",
+            "consulta": "#tablesemreb_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(6) > center > input",
+            "validade": "#tablesemreb_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(7) > center > input",
+            "status": "#tablesemreb_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(8) > center > input",
+            "referencia": "#tablesemreb_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(9) > center > input",
+        }
+        # Selecionar a opção "Todos"
+        select_selector = 'select[name="tablesemreb_length"]'
+        self.page_monisat.hover(select_selector)  # Passar o mouse
+        self.page_monisat.click(select_selector)
+        self.page_monisat.select_option(select_selector, value="-1")
+        logger.info("Selecionada a opção 'Todos' no campo select.")
+
+        # Preencher os campos
+        for key, value in data_cadastro.items():
+            if value:
+                self.page_monisat.fill(selectors[key], value)
+
+        # carrega a tabela por completa
+        load_page(self.page_monisat)
+        wait_load_elements(self.page_monisat, "#tablesemreb_processing")
+        self.page_monisat.wait_for_load_state("networkidle", timeout=30000)
+        card = self.page_monisat.query_selector(".dataTables_scroll")
+        card.screenshot(path=os.path.join(self.path_cards, "TABLE_REBOQUES.png"))
+        if cadastrar:
+            save_selector = "#cadastrarveiculobtn"
+            self.page_monisat.click(
+                "#conteudoPagina > div > div > div > div > div > div.float-right > a > button"
+            )
+            self.page_monisat.click(save_selector)
 
     def fill_iscas(
-        self, nome="", marca="", site="", telefone="", login="", senha="", obs=""
-    ): ...
+        self,
+        nome="",
+        marca="",
+        site="",
+        telefone="",
+        login="",
+        senha="",
+        obs="",
+        cadastrar=False,
+    ):
+        data_cadastro = {
+            "nome": nome,
+            "marca": marca,
+            "site": site,
+            "telefone": telefone,
+            "login": login,
+            "senha": senha,
+            "obs": obs,
+        }
+        selectors = {
+            "nome": "#tableIsca_wrapper > div:nth-child(2) > div > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th.sorting_asc > center > input",
+            "marca": "#tableIsca_wrapper > div:nth-child(2) > div > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(2) > center > input",
+            "site": "#tableIsca_wrapper > div:nth-child(2) > div > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(3) > center > input",
+            "telefone": "#tableIsca_wrapper > div:nth-child(2) > div > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(4) > center > input",
+            "login": "#tableIsca_wrapper > div:nth-child(2) > div > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(5) > center > input",
+            "senha": "#tableIsca_wrapper > div:nth-child(2) > div > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(6) > center > input",
+            "obs": "#tableIsca_wrapper > div:nth-child(2) > div > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(7) > center > input",
+        }
+        # Selecionar a opção "Todos"
+        select_selector = 'select[name="tableIsca_length"]'
+        self.page_monisat.hover(select_selector)  # Passar o mouse
+        self.page_monisat.click(select_selector)
+        self.page_monisat.select_option(select_selector, value="-1")
+        logger.info("Selecionada a opção 'Todos' no campo select.")
 
-    def fill_pontos(self, ponto="", cidade="", cnpj="", tipo="", raio=""): ...
+        for key, value in data_cadastro.items():
+            self.page_monisat.fill(selectors[key], value)
+
+        # carrega a tabela por completa
+        load_page(self.page_monisat)
+        wait_load_elements(self.page_monisat, "#tableIsca_processing")
+        self.page_monisat.wait_for_load_state("networkidle", timeout=30000)
+        card = self.page_monisat.query_selector(".dataTables_scroll")
+        card.screenshot(path=os.path.join(self.path_cards, "TABLE_ISCAS.png"))
+        if cadastrar:
+            save_selector = "#formSalvarIscaBtn"
+            self.page_monisat.fill("#nomeIsca", nome)
+            self.page_monisat.fill("#marca", marca)
+            self.page_monisat.fill("#site", site)
+            self.page_monisat.fill("#telefone", telefone)
+            self.page_monisat.fill("#login", login)
+            self.page_monisat.fill("#senha", senha)
+            self.page_monisat.fill("#obs", obs)
+            self.page_monisat.click(
+                "#conteudoPagina > div > div > div > div > div > div.float-right > a > button"
+            )
+            self.page_monisat.click(save_selector)
+
+    def fill_pontos(
+        self,
+        ponto="",
+        cidade="",
+        cnpj="",
+        tipo="",
+        raio="",
+        cliente_points=False,
+        mapa=False,
+        cadastrar=False,
+    ):
+        data_cadastro = {
+            "ponto": ponto,
+            "cidade": cidade,
+            "cnpj": cnpj,
+            "tipo": tipo,
+            "raio": raio,
+        }
+        selectors = {
+            "ponto": "#tablePonto > thead > tr > th:nth-child(2) > center > input",
+            "cidade": "#tablePonto > thead > tr > th:nth-child(3) > center > input",
+            "cnpj": "#tablePonto > thead > tr > th:nth-child(4) > center > input",
+            "tipo": "#tablePonto > thead > tr > th:nth-child(5) > center > input",
+            "raio": "#tablePonto > thead > tr > th:nth-child(6) > center > input",
+        }
+        btn_pontos = "#conteudoPagina > div > div > div > div > div > div.float-right > a:nth-child(1) > button"
+        btn_cadastro = "#conteudoPagina > div > div > div > div > div > div.float-right > a:nth-child(2) > button"
+        maximize_minimize = "#mapPonto > div.leaflet-control-container > div.leaflet-top.leaflet-left > div.leaflet-control-fullscreen.leaflet-bar.leaflet-control > a"
+        mapa_selector = "#mapPonto"
+
+        if cliente_points:
+            self.page_monisat.click(btn_pontos)
+
+        if mapa:
+            self.page_monisat.click(maximize_minimize)
+            self.page_monisat.wait_for_load_state("networkidle", timeout=30000)
+            self.page_monisat.wait_for_selector(mapa_selector)
+            card = self.page_monisat.query_selector(mapa_selector)
+            card.screenshot(path=os.path.join(self.path_cards, "MAPA_PONTOS.png"))
+            self.page_monisat.click(maximize_minimize)
+
+        # Selecionar a opção "Todos"
+        select_selector = 'select[name="tablePonto_length"]'
+        self.page_monisat.hover(select_selector)  # Passar o mouse
+        self.page_monisat.click(select_selector)
+        self.page_monisat.select_option(select_selector, value="-1")
+        logger.info("Selecionada a opção 'Todos' no campo select.")
+
+        for key, value in data_cadastro.items():
+            self.page_monisat.fill(selectors[key], value)
+        # carrega a tabela por completa
+        load_page(self.page_monisat)
+        wait_load_elements(self.page_monisat, "#tablePonto_processing")
+        self.page_monisat.wait_for_load_state("networkidle", timeout=30000)
+        card = self.page_monisat.query_selector(".dataTables_scroll")
+        card.screenshot(path=os.path.join(self.path_cards, "TABLE_PONTOS.png"))
+        if cadastrar:
+            logger.info("Cadastrando pontos...")
 
     def fill_retrograma(
-        self, id="", retrograma="", distancia="", criado_por="", data_hora=""
-    ): ...
+        self,
+        id_="",
+        retrograma="",
+        distancia="",
+        criado_por="",
+        data_hora="",
+        rotas_alternativas=False,
+        cadastrar=False,
+    ):
+        data_cadastro = {
+            "id": id_,
+            "retrograma": retrograma,
+            "distancia": distancia,
+            "criado_por": criado_por,
+            "data_hora": data_hora,
+        }
+        selectors = {
+            "id": "#tableRotograma_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(2) > center > input",
+            "retrograma": "#tableRotograma_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(3) > center > input",
+            "distancia": "#tableRotograma_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(4) > center > input",
+            "criado_por": "#tableRotograma_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(5) > center > input",
+            "data_hora": "#tableRotograma_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(6) > center > input",
+        }
+        if rotas_alternativas:
+            self.page_monisat.click(
+                "#conteudoPagina > div > div > div > div > div > div.float-right > button:nth-child(2)"
+            )
+
+        # Selecionar a opção "Todos"
+        select_selector = 'select[name="tableRotograma_length"]'
+        self.page_monisat.hover(select_selector)  # Passar o mouse
+        self.page_monisat.click(select_selector)
+        self.page_monisat.select_option(select_selector, value="-1")
+        logger.info("Selecionada a opção 'Todos' no campo select.")
+
+        for key, value in data_cadastro.items():
+            self.page_monisat.fill(selectors[key], value)
+
+        # carrega a tabela por completa
+        load_page(self.page_monisat)
+        wait_load_elements(self.page_monisat, "#tableRotograma_processing")
+        self.page_monisat.wait_for_load_state("networkidle", timeout=30000)
+        card = self.page_monisat.query_selector(".dataTables_scroll")
+        card.screenshot(path=os.path.join(self.path_cards, "TABLE_RETROGRAMA.png"))
+        if cadastrar:
+            logger.info("Cadastrando retrogrma...")
+
+    def logistica(self, **kwargs):
+        pass
+
     def fill_car(
         self,
         placa="",
@@ -275,20 +424,39 @@ class CadMoniSAT:
         validade="",
         status="",
         referencia="",
+        cadastrar=False,
     ):
-        placa_selector = "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th.sorting_asc > center > input"
-        situacao_selector = "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(3) > center > input"
-        tipo_selector = "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(4) > center > input"
-        categoria_selector = "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(5) > center > input"
-        rastreador_selector = "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(6) > center > input"
-        n_antena_selector = "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(7) > center > input"
-        semi_reboque_selector = "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(8) > center > input"
-        motorista_selector = "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(9) > center > input"
-        operacao_selector = "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(10) > center > input"
-        consulta_selector = "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(11) > center > input"
-        validade_selector = "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(12) > center > input"
-        status_selector = "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(13) > center > input"
-        referencia_selector = "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(14) > center > input"
+
+        data_catastro = {
+            "placa": placa,
+            "situacao": situacao,
+            "tipo": tipo,
+            "categoria": categoria,
+            "rastreador": rastreador,
+            "n_antena": n_antena,
+            "semi_reboque": semi_reboque,
+            "motorista": motorista,
+            "operacao": operacao,
+            "consulta": consulta,
+            "validade": validade,
+            "status": status,
+            "referencia": referencia,
+        }
+        selectors = {
+            "placa": "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th.sorting_asc > center > input",
+            "situacao": "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(3) > center > input",
+            "tipo": "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(4) > center > input",
+            "categoria": "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(5) > center > input",
+            "rastreador": "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(6) > center > input",
+            "n_antena": "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(7) > center > input",
+            "semi_reboque": "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(8) > center > input",
+            "motorista": "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(9) > center > input",
+            "operacao": "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(10) > center > input",
+            "consulta": "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(11) > center > input",
+            "validade": "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(12) > center > input",
+            "status": "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(13) > center > input",
+            "referencia": "#tableveic_wrapper > div.dataTables_scroll > div.dataTables_scrollHead > div > table > thead > tr > th:nth-child(14) > center > input",
+        }
 
         # Selecionar a opção "Todos"
         select_selector = 'select[name="tableveic_length"]'
@@ -298,18 +466,21 @@ class CadMoniSAT:
         logger.info("Selecionada a opção 'Todos' no campo select.")
 
         logger.info("Preenchendo veículo...")
-        self.page_monisat.fill(placa_selector, placa)
-        self.page_monisat.fill(situacao_selector, situacao)
-        self.page_monisat.fill(tipo_selector, tipo)
-        self.page_monisat.fill(categoria_selector, categoria)
-        self.page_monisat.fill(rastreador_selector, rastreador)
+        for key, value in data_catastro.items():
+            self.page_monisat.fill(selectors[key], value)
 
         # carrega a tabela por completa
         load_page(self.page_monisat)
         wait_load_elements(self.page_monisat, "#tableveic_processing")
         self.page_monisat.wait_for_load_state("networkidle", timeout=30000)
-        card = self.page_monisat.query_selector(".card-body")
+        card = self.page_monisat.query_selector(".dataTables_scroll")
         card.screenshot(path=os.path.join(self.path_cards, "TABLE_CARS.png"))
+        if cadastrar:
+            save_selector = "#cadastrarveiculobtn"
+            self.page_monisat.click(
+                "#conteudoPagina > div > div > div > div > div > div.float-right > a > button"
+            )
+            self.page_monisat.click(save_selector)
 
     def fill_driver(
         self,
@@ -365,7 +536,7 @@ class CadMoniSAT:
         load_page(self.page_monisat)
         wait_load_elements(self.page_monisat, "#tablemot_processing")
         self.page_monisat.wait_for_load_state("networkidle", timeout=30000)
-        card = self.page_monisat.query_selector(".card-body")
+        card = self.page_monisat.query_selector(".dataTables_scroll")
 
         card.screenshot(path=os.path.join(self.path_cards, "TABLE_MOTORISTA.png"))
         if cadastrar:
@@ -374,16 +545,6 @@ class CadMoniSAT:
                 "#conteudoPagina > div > div > div > div > div > div.float-right > a > button"
             )
             self.page_monisat.click(save_selector)
-
-    def fechar(self):
-        try:
-            if self.browser:
-                self.browser.close()
-            if hasattr(self, "playwright"):
-                self.playwright.stop()
-            logger.debug("Navegador encerrado com sucesso.")
-        except Exception as e:
-            logger.error(f"Erro ao fechar o navegador: {str(e)}")
 
 
 if __name__ == "__main__":
