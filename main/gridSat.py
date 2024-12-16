@@ -16,6 +16,12 @@ class GridMoniSAT(MoniSat):
         super().__init__()
 
     def extrator_to_grid(self, map_=True, list_results: bool | dict = True):
+        """Extrai dados do grid do MoniSAT
+
+        Args:
+            map_ (bool, optional): Mapa sim ou não?. Defaults to True.
+            list_results (bool | dict, optional): Grade de resultados não ou dicionario de parametros. Defaults to True.
+        """
         try:
             self.login()
 
@@ -49,7 +55,7 @@ class GridMoniSAT(MoniSat):
         except Exception as e:
             logger.error(f"Erro durante a extração: {str(e)}")
             self.fechar()
-            raise
+            pass
 
     def __extract_to_list(self, **kwargs):
         elements = {

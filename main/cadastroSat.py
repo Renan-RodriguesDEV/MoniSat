@@ -22,8 +22,8 @@ class CadMoniSAT(MoniSat):
     def __init__(self):
         super().__init__()
 
-    def option_select_for_logistic(self):
-        self.page_monisat.pause()
+    def __option_select_for_logistic(self):
+        """Auxilia a selecionar o campo de logistica no menu."""
 
         chevron_selector = "#navigation > ul > li:nth-child(3) > a > i.fas.fa-edit"
         self.page_monisat.hover(chevron_selector)  # Passar o mouse
@@ -35,24 +35,48 @@ class CadMoniSAT(MoniSat):
         option.click()  # Clicar na opção do menu
         option.hover()
 
-    def get_options(
-        self,
-        params_driver=None,
-        params_car=None,
-        params_reboque=None,
-        params_iscas=None,
-        params_pontos=None,
-        params_rotograma=None,
-        params_logistica=None,
-        cadastrar_driver=False,
-        cadastrar_car=False,
-        cadastrar_reboque=False,
-        cadastrar_iscas=False,
-        cadastrar_pontos=False,
-        cliente_points=False,
-        cadastrar_rotograma=False,
-        rotas_alternativas=False,
-    ):
+    def process_cadastro(
+            self,
+            params_driver: dict = None,
+            params_car: dict = None,
+            params_reboque: dict = None,
+            params_iscas: dict = None,
+            params_pontos: dict = None,
+            params_rotograma: dict = None,
+            params_logistica: dict = None,
+            cadastrar_driver: bool = False,
+            cadastrar_car: bool = False,
+            cadastrar_reboque: bool = False,
+            cadastrar_iscas: bool = False,
+            cadastrar_pontos: bool = False,
+            cliente_points: bool = False,
+            cadastrar_rotograma: bool = False,
+            rotas_alternativas: bool = False,
+        ):
+        """
+        Preenche e cadastra informações no sistema MoniSat com base nos dados fornecidos.
+
+        Esta função realiza login no sistema MoniSat, navega pelas opções do menu e preenche
+        os formulários correspondentes com os dados fornecidos nos dicionários de parâmetros.
+        Cada tipo de cadastro (Motorista, Veículo, Reboque, etc.) é tratado por uma função específica.
+
+        Args:
+            params_driver (dict, optional): Parâmetros para cadastro de motorista. Defaults to None.
+            params_car (dict, optional): Parâmetros para cadastro de veículo. Defaults to None.
+            params_reboque (dict, optional): Parâmetros para cadastro de reboque. Defaults to None.
+            params_iscas (dict, optional): Parâmetros para cadastro de iscas. Defaults to None.
+            params_pontos (dict, optional): Parâmetros para cadastro de pontos. Defaults to None.
+            params_rotograma (dict, optional): Parâmetros para cadastro de rotograma. Defaults to None.
+            params_logistica (dict, optional): Parâmetros para cadastro de logística. Defaults to None.
+            cadastrar_driver (bool, optional): Indica se deve cadastrar motorista. Defaults to False.
+            cadastrar_car (bool, optional): Indica se deve cadastrar veículo. Defaults to False.
+            cadastrar_reboque (bool, optional): Indica se deve cadastrar reboque. Defaults to False.
+            cadastrar_iscas (bool, optional): Indica se deve cadastrar iscas. Defaults to False.
+            cadastrar_pontos (bool, optional): Indica se deve cadastrar pontos. Defaults to False.
+            cliente_points (bool, optional): Indica se os pontos são de cliente. Defaults to False.
+            cadastrar_rotograma (bool, optional): Indica se deve cadastrar rotograma. Defaults to False.
+            rotas_alternativas (bool, optional): Indica se deve considerar rotas alternativas. Defaults to False.
+        """
         # Parâmetros com valores padrão vazios, caso não sejam passados
         params_driver = params_driver or {}
         params_car = params_car or {}
@@ -62,12 +86,14 @@ class CadMoniSAT(MoniSat):
         params_rotograma = params_rotograma or {}
         params_logistica = params_logistica or {}
 
+        # Realiza login no sistema MoniSat
         self.login()
 
+        # Seleciona todas as opções do menu de navegação
         selector_options = "#navigation > ul > li:nth-child(3) > ul > li > a"
         options_elements = self.page_monisat.query_selector_all(selector_options)
 
-        # Armazenar referências das funções sem executá-las
+        # Dicionário que mapeia cada opção do menu para a função correspondente
         dict_func = {
             "Motorista": lambda: (
                 self.fill_driver(
@@ -182,18 +208,18 @@ class CadMoniSAT(MoniSat):
             logger.debug(f"Tentando selecionar a opção: {option_text}")
 
             try:
-                self.page_monisat.hover(chevron_selector)  # Passar o mouse
-                self.page_monisat.click(chevron_selector)  # Clicar no dropdown
+                # Passar o mouse e clicar no dropdown
+                self.page_monisat.hover(chevron_selector)
+                self.page_monisat.click(chevron_selector)
                 sleep(1)
 
-                option.click()  # Clicar na opção do menu
+                # Clicar na opção do menu
+                option.click()
                 if option_text == "Logística":
                     option.hover()
-                if (
-                    option_text in dict_func and dict_func[option_text]
-                ):  # Executa apenas se a função não for None
-
-                    dict_func[option_text]()  # Executar a função correspondente
+                if option_text in dict_func and dict_func[option_text]:
+                    # Executar a função correspondente
+                    dict_func[option_text]()
                 else:
                     logger.warning(
                         f"Opção '{option_text}' não reconhecida ou função não executada devido a parâmetros."
@@ -443,21 +469,21 @@ class CadMoniSAT(MoniSat):
             os.path.join(self.path_cards, "LOGISTICA_SITUACAO_VIAGEM.png"),
             args_viagem,
         )
-        self.option_select_for_logistic()
+        self.__option_select_for_logistic()
         situacao_veiculo(
             self.page_monisat,
             os.path.join(self.path_cards, "LOGISTICA_SITUACAO_VEICULO.png"),
             args_veiculo.get("pesquisa"),
             args_veiculo.get("cadatro"),
         )
-        self.option_select_for_logistic()
+        self.__option_select_for_logistic()
         c_gestor(
             self.page_monisat,
             os.path.join(self.path_cards, "LOGISTICA_C_GESTOR.png"),
             args_gestor.get("pesquisa"),
             args_gestor.get("cadastro"),
         )
-        self.option_select_for_logistic()
+        self.__option_select_for_logistic()
         c_reboque(
             self.page_monisat,
             os.path.join(self.path_cards, "LOGISTICA_C_REBOQUE.png"),
@@ -613,7 +639,7 @@ if __name__ == "__main__":
             # "categoria": "Carga",
             # "rastreador": "Sim",
         }
-        handler.get_options(params_car=params_car, params_driver=params_driver)
+        handler.process_cadastro(params_car=params_car, params_driver=params_driver)
     except Exception as e:
         logger.error(f"Erro na execução do script: {str(e)}")
     finally:
