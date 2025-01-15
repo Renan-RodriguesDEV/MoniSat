@@ -15,9 +15,8 @@ def situacao_viagem(page, path, save=False):
             page.query_selector(
                 "#situacaoViagemForm > div.float-right > button"
             ).click()
-        page.query_selector(
-            "#modalDetalhes > div > div > div.modal-header > button"
-        ).click()
+        x_button = "#modalDetalhes > div > div > div.modal-header > button"
+        page.query_selector(x_button).click()
     except Exception as e:
         print(f"[ERROR] {str(e)} [ERROR]")
         pass
@@ -49,9 +48,9 @@ def situacao_veiculo(page, path, pesquisa="", cadastro={"descricao": "", "cor": 
                 page.query_selector(selectors_cadastro[key]).fill(value=val)
 
             page.query_selector("#formSitAddBtn").click()
-            page.query_selector(
-                "#modalDetalhes > div > div > div.modal-header > button"
-            ).click()
+        page.query_selector(
+            "#modalDetalhes > div > div > div.modal-header > button"
+        ).click()
     except Exception as e:
         print(f"[ERROR] {str(e)} [ERROR]")
         pass

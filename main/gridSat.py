@@ -115,7 +115,7 @@ if __name__ == "__main__":
         "st_viagem": "Em andamento",
     }
     try:
-        handler.extrator_to_grid(map_=False, list_results=parametros)
+        handler.extrator_to_grid(map_=True, list_results=True)
     except Exception as e:
         logger.error(f"Erro na execução do script: {str(e)}")
     finally:

@@ -226,7 +226,6 @@ class CadMoniSAT(MoniSat):
 
             except Exception as e:
                 logger.error(f"Erro ao clicar em '{option_text}': {str(e)}")
-                pass
 
     def fill_reboque(
         self,
@@ -637,8 +636,9 @@ if __name__ == "__main__":
             # "categoria": "Carga",
             # "rastreador": "Sim",
         }
-        handler.process_cadastro(params_car=params_car, params_driver=params_driver)
+        handler.process_cadastro(params_driver=params_driver)
     except Exception as e:
         logger.error(f"Erro na execução do script: {str(e)}")
+        handler.page_monisat.pause()
     finally:
         handler.fechar()
