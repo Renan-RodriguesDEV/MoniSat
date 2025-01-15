@@ -1,11 +1,7 @@
-from playwright.sync_api import sync_playwright
-from dotenv import load_dotenv
 import os
-import logging
-from time import sleep
 
+from SuperClassMoni import CustomFormatter, MoniSat, ch, logger
 from uteis import load_page, wait_load_elements
-from SuperClassMoni import MoniSat, ch, logger, CustomFormatter
 
 ch.setFormatter(CustomFormatter())
 logger.addHandler(ch)
@@ -110,9 +106,16 @@ class GridMoniSAT(MoniSat):
 
 if __name__ == "__main__":
     handler = GridMoniSAT()
-    parametros = {}
+    parametros = {
+        "placa": "ABC1234",
+        "carreta": "XYZ5678",
+        "moto": "MOT123",
+        "loc": "São Paulo",
+        "rota": "Rota 66",
+        "st_viagem": "Em andamento",
+    }
     try:
-        handler.extrator_to_grid(map_=False, list_results=True)
+        handler.extrator_to_grid(map_=False, list_results=parametros)
     except Exception as e:
         logger.error(f"Erro na execução do script: {str(e)}")
     finally:

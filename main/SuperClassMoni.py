@@ -1,4 +1,7 @@
-# create logger with 'spam_application'
+"""
+Classe mãe dos scrappers
+"""
+
 import logging
 
 logger = logging.getLogger("scrapper")
@@ -38,8 +41,6 @@ from dotenv import load_dotenv
 import os
 from SuperClassMoni import CustomFormatter, ch, logger
 from time import sleep
-
-from uteis import load_page, wait_load_elements
 
 load_dotenv()
 
@@ -94,7 +95,9 @@ class MoniSat:
     def login(self):
         try:
             logger.debug("Iniciando extração.")
-            self.page_monisat = self.browser.new_page()
+            self.page_monisat = (
+                self.browser.pages[0] if self.browser.pages else self.browser.new_page()
+            )
 
             # Adicionar timeout para carregamento da página
             self.page_monisat.goto(self.url, timeout=30000)

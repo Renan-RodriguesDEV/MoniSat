@@ -1,4 +1,6 @@
-# from playwright.sync_api import Page
+"""
+Utilitarios para logistica
+"""
 
 
 def situacao_viagem(page, path, save=False):

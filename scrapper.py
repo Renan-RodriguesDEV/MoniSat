@@ -53,7 +53,7 @@ class MoniSAT():
         
         try:
             app_data_path = os.getenv('LOCALAPPDATA')
-            user_data_path = os.path.join(app_data_path, r'Google\Chrome\User Data\Default\Bot')
+            user_data_path = os.path.join(app_data_path, r"Google\Chrome\User Data\Default\Google Profile")
             
             # Criar diretório para screenshots se não existir
             os.makedirs(os.path.join(os.getcwd(), 'cards'), exist_ok=True)

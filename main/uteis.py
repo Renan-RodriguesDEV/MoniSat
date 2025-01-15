@@ -1,5 +1,8 @@
+"""
+Arquivos de Utilização para playwright
+"""
+
 import time
-from playwright.sync_api import sync_playwright
 
 
 def load_page(page, scroll_pause_time=2.5):

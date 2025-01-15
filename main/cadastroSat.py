@@ -1,8 +1,6 @@
-from playwright.sync_api import sync_playwright
-from dotenv import load_dotenv
 import os
-from SuperClassMoni import CustomFormatter, MoniSat, ch, logger
 from time import sleep
+
 from logistica import (
     c_gestor,
     c_reboque,
@@ -11,8 +9,8 @@ from logistica import (
     situacao_veiculo,
     situacao_viagem,
 )
+from SuperClassMoni import CustomFormatter, MoniSat, ch, logger
 from uteis import load_page, wait_load_elements
-
 
 ch.setFormatter(CustomFormatter())
 logger.addHandler(ch)
@@ -36,23 +34,23 @@ class CadMoniSAT(MoniSat):
         option.hover()
 
     def process_cadastro(
-            self,
-            params_driver: dict = None,
-            params_car: dict = None,
-            params_reboque: dict = None,
-            params_iscas: dict = None,
-            params_pontos: dict = None,
-            params_rotograma: dict = None,
-            params_logistica: dict = None,
-            cadastrar_driver: bool = False,
-            cadastrar_car: bool = False,
-            cadastrar_reboque: bool = False,
-            cadastrar_iscas: bool = False,
-            cadastrar_pontos: bool = False,
-            cliente_points: bool = False,
-            cadastrar_rotograma: bool = False,
-            rotas_alternativas: bool = False,
-        ):
+        self,
+        params_driver: dict = None,
+        params_car: dict = None,
+        params_reboque: dict = None,
+        params_iscas: dict = None,
+        params_pontos: dict = None,
+        params_rotograma: dict = None,
+        params_logistica: dict = None,
+        cadastrar_driver: bool = False,
+        cadastrar_car: bool = False,
+        cadastrar_reboque: bool = False,
+        cadastrar_iscas: bool = False,
+        cadastrar_pontos: bool = False,
+        cliente_points: bool = False,
+        cadastrar_rotograma: bool = False,
+        rotas_alternativas: bool = False,
+    ):
         """
         Preenche e cadastra informações no sistema MoniSat com base nos dados fornecidos.
 
