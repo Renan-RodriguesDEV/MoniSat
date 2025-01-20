@@ -2,6 +2,58 @@
 Utilitarios para logistica
 """
 
+import os
+from time import sleep
+
+path_cards = os.path.join(os.getcwd(), "cards")
+def __option_select_for_logistic(page_monisat):
+    """Auxilia a selecionar o campo de logistica no menu."""
+
+    chevron_selector = "#navigation > ul > li:nth-child(3) > a > i.fas.fa-edit"
+    page_monisat.hover(chevron_selector)  # Passar o mouse
+    page_monisat.click(chevron_selector)  # Clicar no dropdown
+    sleep(1)
+    option = page_monisat.query_selector(
+        "#navigation > ul > li:nth-child(3) > ul > li.has-submenu > a"
+    )
+    option.click()  # Clicar na opção do menu
+    option.hover()
+
+
+def fill_logistica(
+    page_monisat,
+    args_viagem=False,
+    args_veiculo={"pesquisa": "", "cadastro": {"descricao": "", "cor": "Preto"}},
+    args_gestor={"pesquisa": "", "cadastro": {"descricao": "", "cor": "Preto"}},
+    args_reboque={"pesquisa": "", "cadastro": {"descricao": "", "cor": "Preto"}},
+):
+    situacao_viagem(
+        page_monisat,
+        os.path.join(path_cards, "LOGISTICA_SITUACAO_VIAGEM.png"),
+        args_viagem,
+    )
+    __option_select_for_logistic()
+    situacao_veiculo(
+        page_monisat,
+        os.path.join(path_cards, "LOGISTICA_SITUACAO_VEICULO.png"),
+        args_veiculo.get("pesquisa"),
+        args_veiculo.get("cadatro"),
+    )
+    __option_select_for_logistic()
+    c_gestor(
+        page_monisat,
+        os.path.join(path_cards, "LOGISTICA_C_GESTOR.png"),
+        args_gestor.get("pesquisa"),
+        args_gestor.get("cadastro"),
+    )
+    __option_select_for_logistic()
+    c_reboque(
+        page_monisat,
+        os.path.join(path_cards, "LOGISTICA_C_REBOQUE.png"),
+        args_reboque.get("pesquisa"),
+        args_reboque.get("cadastro"),
+    )
+
 
 def situacao_viagem(page, path, save=False):
     try:
@@ -123,49 +175,3 @@ def c_reboque(page, path, pesquisa="", cadastro={"descricao": "", "cor": ""}):
         pass
 
 
-def cad_driver(page, cpf):
-    try:
-        selecao_element = page.query_selector(
-            "#conteudoPagina > div > div > div > div > div > div.float-right > a > button"
-        )
-        selecao_element.click()
-        cpf_element = page.query_selector("#mot-cpf")
-        procurar_element = page.query_selector(
-            "#cadastrarmotorista > div.row > div.col-md1 > button.btn.btn-sm.btn-primary"
-        )
-        cpf_element.fill(value=cpf)
-        procurar_element.click()
-        page.wait_for_load_state("networkidle")
-        page.query_selector("#resultadobuscamotorista").screenshot(
-            "MOTORISTA_CADASTRADO.png"
-        )
-        page.query_selector("#cadastrarmotoristabtn").click()
-        page.query_selector(
-            "#modalDetalhes > div > div > div.modal-header > button"
-        ).click()
-    except Exception as e:
-        print(f"[ERROR] {str(e)} [ERROR]")
-        pass
-
-
-def cad_veiculo(page, placa):
-    try:
-        selecao_element = page.query_selector(
-            "#conteudoPagina > div > div > div > div > div > div.float-right > a > button"
-        )
-        selecao_element.click()
-        placa_element = page.query_selector("#veic-placa")
-        procurar_element = page.query_selector(
-            "#cadastrarveiculo > div.row > div.col-md1 > button.btn.btn-primary.btn-sm"
-        )
-        placa_element.fill(value=placa)
-        procurar_element.click()
-        page.wait_for_load_state("networkidle")
-        page.query_selector("#resultadobuscaplaca").screenshot("VEICULO_CADASTRADO.png")
-        page.query_selector("#cadastrarveiculobtn").click()
-        page.query_selector(
-            "#modalDetalhes > div > div > div.modal-header > button"
-        ).click()
-    except Exception as e:
-        print(f"[ERROR] {str(e)} [ERROR]")
-        pass

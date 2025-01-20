@@ -1,7 +1,7 @@
 import os
-
-from SuperClassMoni import CustomFormatter, MoniSat, ch, logger
-from uteis import load_page, wait_load_elements
+from __init__ import *
+from main.SuperClassMoni import CustomFormatter, MoniSat, ch, logger
+from main.uteis import load_page, wait_load_elements
 
 ch.setFormatter(CustomFormatter())
 logger.addHandler(ch)

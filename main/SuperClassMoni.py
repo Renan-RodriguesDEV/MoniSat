@@ -4,6 +4,12 @@ Classe mãe dos scrappers
 
 import logging
 
+
+from playwright.sync_api import sync_playwright
+from dotenv import load_dotenv
+import os
+from time import sleep
+
 logger = logging.getLogger("scrapper")
 logger.setLevel(logging.DEBUG)
 
@@ -35,12 +41,6 @@ class CustomFormatter(logging.Formatter):
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
 
-
-from playwright.sync_api import sync_playwright
-from dotenv import load_dotenv
-import os
-from SuperClassMoni import CustomFormatter, ch, logger
-from time import sleep
 
 load_dotenv()
 
