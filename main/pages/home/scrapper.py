@@ -29,6 +29,7 @@ class MoniScraper(MoniSat):
             cards = self.page_monisat.query_selector_all('div[class="card"]')
 
             for index, card in enumerate(cards):
+                # self.page_monisat.pause()
                 card_body = card.query_selector('div[class="card-body"]')
                 if card_body:
                     h4_element = card_body.query_selector("h4")

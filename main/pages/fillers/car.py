@@ -1,4 +1,6 @@
 import os
+
+import pandas as pd
 from main.uteis import load_page, wait_load_elements
 from main.SuperClassMoni import CustomFormatter, ch, logger
 
@@ -77,6 +79,8 @@ def fill_car(
     if cadastrar:
         cad_veiculo(page_monisat, placa)
 
+    get_data_of_cars(page_monisat)
+
 
 def cad_veiculo(page, placa):
     try:
@@ -99,3 +103,51 @@ def cad_veiculo(page, placa):
     except Exception as e:
         print(f"[ERROR] {str(e)} [ERROR]")
         pass
+
+
+def get_data_of_cars(page):
+    print(">> Iterando sobre dados da tabela de veiculos...")
+    lines_of_table = page.query_selector_all('//*[@id="tableveic"]/tbody/tr')
+    campos = [
+        "placa",
+        "icone",
+        "situacao",
+        "tipo",
+        "categoria",
+        "rastreador",
+        "n_antena",
+        "semi_reboque",
+        "motorista",
+        "operacao",
+        "consulta",
+        "validade",
+        "status",
+        "referencia",
+        "acao",
+    ]
+    data = []
+    for row_index, row in enumerate(lines_of_table, start=1):
+        row_data = {}
+        for col_index, campo in enumerate(campos, start=1):
+            try:
+                content = page.query_selector(
+                    f'//*[@id="tableveic"]/tbody/tr[{row_index}]/td[{col_index}]/center'
+                )
+                if content:
+                    content_text = content.text_content().strip()
+                    print(f"{campo} | {content_text}")
+                    row_data[campo] = content_text
+                else:
+                    print(f"{campo} | ")
+                    row_data[campo] = ""
+            except Exception as e:
+                print(f"[ERROR] {str(e)} [ERROR]")
+                continue
+        data.append(row_data)
+        print("=" * 100)
+
+    if data:
+        pd.DataFrame(data).to_csv("cars.csv", index=False)
+        print("[INFO]>> Data saved in drivers.csv [INFO]")
+    else:
+        print("[INFO]>> Unable to save data [INFO]")

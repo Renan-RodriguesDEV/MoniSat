@@ -2,13 +2,13 @@ from time import sleep
 from __init__ import *
 
 from main.SuperClassMoni import CustomFormatter, MoniSat, ch, logger
-from main.pages.cadastro.car import fill_car
-from main.pages.cadastro.driver import fill_driver
-from main.pages.cadastro.iscas import fill_iscas
-from main.pages.cadastro.logistica import fill_logistica
-from main.pages.cadastro.pontos import fill_pontos
-from main.pages.cadastro.reboque import fill_reboque
-from main.pages.cadastro.retrograma import fill_retrograma
+from main.pages.fillers.car import fill_car
+from main.pages.fillers.driver import fill_driver
+from main.pages.fillers.iscas import fill_iscas
+from main.pages.fillers.logistica import fill_logistica
+from main.pages.fillers.pontos import fill_pontos
+from main.pages.fillers.reboque import fill_reboque
+from main.pages.fillers.retrograma import fill_retrograma
 
 ch.setFormatter(CustomFormatter())
 logger.addHandler(ch)
@@ -21,12 +21,19 @@ class CadMoniSAT(MoniSat):
     def process_cadastro(
         self,
         params_driver: dict = None,
+        all_drivers: bool = True,
         params_car: dict = None,
+        all_cars: bool = True,
         params_reboque: dict = None,
+        all_reboques: bool = True,
         params_iscas: dict = None,
+        all_iscas: bool = True,
         params_pontos: dict = None,
-        params_rotograma: dict = None,
+        all_pontos: bool = True,
+        params_retograma: dict = None,
+        all_retogramas: bool = True,
         params_logistica: dict = None,
+        all_logisticas: bool = True,
         cadastrar_driver: bool = False,
         cadastrar_car: bool = False,
         cadastrar_reboque: bool = False,
@@ -66,7 +73,7 @@ class CadMoniSAT(MoniSat):
         params_reboque = params_reboque or {}
         params_iscas = params_iscas or {}
         params_pontos = params_pontos or {}
-        params_rotograma = params_rotograma or {}
+        params_retograma = params_retograma or {}
         params_logistica = params_logistica or {}
 
         # Realiza login no sistema MoniSat
@@ -94,7 +101,7 @@ class CadMoniSAT(MoniSat):
                     cadastrar_driver,
                 )
                 if params_driver
-                else None
+                else fill_driver(self.page_monisat) if all_drivers else None
             ),
             "Veículo": lambda: (
                 fill_car(
@@ -115,7 +122,7 @@ class CadMoniSAT(MoniSat):
                     cadastrar_car,
                 )
                 if params_car
-                else None
+                else fill_car(self.page_monisat) if all_cars else None
             ),
             "Reboque": lambda: (
                 fill_reboque(
@@ -132,7 +139,7 @@ class CadMoniSAT(MoniSat):
                     cadastrar_reboque,
                 )
                 if params_reboque
-                else None
+                else fill_reboque(self.page_monisat) if all_reboques else None
             ),
             "Isca/Redundante": lambda: (
                 fill_iscas(
@@ -147,7 +154,7 @@ class CadMoniSAT(MoniSat):
                     cadastrar_iscas,
                 )
                 if params_iscas
-                else None
+                else fill_iscas(self.page_monisat) if all_iscas else None
             ),
             "Pontos": lambda: (
                 fill_pontos(
@@ -161,21 +168,21 @@ class CadMoniSAT(MoniSat):
                     cadastrar_pontos,
                 )
                 if params_pontos
-                else None
+                else fill_pontos(self.page_monisat) if all_pontos else None
             ),
             "Rotograma": lambda: (
                 fill_retrograma(
                     self.page_monisat,
-                    params_rotograma.get("id", ""),
-                    params_rotograma.get("retrograma", ""),
-                    params_rotograma.get("distancia", ""),
-                    params_rotograma.get("criado_por", ""),
-                    params_rotograma.get("data_hora", ""),
+                    params_retograma.get("id", ""),
+                    params_retograma.get("retrograma", ""),
+                    params_retograma.get("distancia", ""),
+                    params_retograma.get("criado_por", ""),
+                    params_retograma.get("data_hora", ""),
                     rotas_alternativas,
                     cadastrar_rotograma,
                 )
-                if params_rotograma
-                else None
+                if params_retograma
+                else fill_retrograma(self.page_monisat) if all_retogramas else None
             ),
             "Logística": lambda: (
                 fill_logistica(
@@ -186,7 +193,7 @@ class CadMoniSAT(MoniSat):
                     params_logistica.get("args_reboque", ""),
                 )
                 if params_logistica
-                else None
+                else fill_logistica(self.page_monisat) if all_logisticas else None
             ),
         }
 

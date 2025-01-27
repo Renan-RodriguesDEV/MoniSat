@@ -1,4 +1,6 @@
 import os
+
+import pandas as pd
 from main.uteis import load_page, wait_load_elements
 from main.SuperClassMoni import CustomFormatter, ch, logger
 
@@ -68,6 +70,8 @@ def fill_driver(
     if cadastrar:
         cad_driver(page_monisat, cpf)
 
+    get_data_of_drivers(page_monisat)
+
 
 def cad_driver(page, cpf):
     try:
@@ -92,3 +96,47 @@ def cad_driver(page, cpf):
     except Exception as e:
         print(f"[ERROR] {str(e)} [ERROR]")
         pass
+
+
+def get_data_of_drivers(page):
+    print(">> Iterando sobre dados de motorista...")
+    lines_of_table = page.query_selector_all('//*[@id="tablemot"]/tbody/tr')
+    campos = [
+        "nome",
+        "rg",
+        "cpf",
+        "cnh",
+        "tipo_de_motorista",
+        "possui_senha",
+        "consulta",
+        "validade",
+        "status",
+        "referencia",
+        "acao",
+    ]
+    data = []
+    for row_index, row in enumerate(lines_of_table, start=1):
+        row_data = {}
+        for col_index, campo in enumerate(campos, start=1):
+            try:
+                content = page.query_selector(
+                    f'//*[@id="tablemot"]/tbody/tr[{row_index}]/td[{col_index}]/center'
+                )
+                if content:
+                    content_text = content.text_content().strip()
+                    print(f"{campo} | {content_text}")
+                    row_data[campo] = content_text
+                else:
+                    print(f"{campo} | ")
+                    row_data[campo] = ""
+            except Exception as e:
+                print(f"[ERROR] {str(e)} [ERROR]")
+                continue
+        data.append(row_data)
+        print("=" * 100)
+
+    if data:
+        pd.DataFrame(data).to_csv("drivers.csv", index=False)
+        print("[INFO]>> Dados salvos em drivers.csv [INFO]")
+    else:
+        print("[INFO]>> Não foi possivel salvar drivers.csv [INFO]")
