@@ -8,6 +8,7 @@ ch.setFormatter(CustomFormatter())
 logger.addHandler(ch)
 
 path_cards = os.path.join(os.getcwd(), "cards")
+path_data = os.path.join(os.getcwd(), "data")
 
 
 def fill_car(
@@ -147,7 +148,7 @@ def get_data_of_cars(page):
         print("=" * 100)
 
     if data:
-        pd.DataFrame(data).to_csv("cars.csv", index=False)
+        pd.DataFrame(data).to_csv(f"{path_data}/cars.csv", index=False)
         print("[INFO]>> Data saved in drivers.csv [INFO]")
     else:
         print("[INFO]>> Unable to save data [INFO]")

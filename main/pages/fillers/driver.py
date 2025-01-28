@@ -8,6 +8,7 @@ ch.setFormatter(CustomFormatter())
 logger.addHandler(ch)
 
 path_cards = os.path.join(os.getcwd(), "cards")
+path_data = os.path.join(os.getcwd(), "data")
 
 
 def fill_driver(
@@ -136,7 +137,7 @@ def get_data_of_drivers(page):
         print("=" * 100)
 
     if data:
-        pd.DataFrame(data).to_csv("drivers.csv", index=False)
+        pd.DataFrame(data).to_csv(f"{path_data}/drivers.csv", index=False)
         print("[INFO]>> Dados salvos em drivers.csv [INFO]")
     else:
         print("[INFO]>> Não foi possivel salvar drivers.csv [INFO]")

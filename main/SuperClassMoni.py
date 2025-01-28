@@ -17,6 +17,11 @@ logger.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 
+if not os.path.exists("cards"):
+    os.makedirs("cards")
+if not os.path.exists("data"):
+    os.makedirs("data")
+
 
 class CustomFormatter(logging.Formatter):
     grey = "\x1b[38;20m"
@@ -63,6 +68,7 @@ class MoniSat:
         self.senha = os.getenv("SENHA")
         self.browser = None
         self.path_cards = os.path.join(os.getcwd(), "cards")
+        self.path_data = os.path.join(os.getcwd(), "data")
 
         try:
             app_data_path = os.getenv("LOCALAPPDATA")
