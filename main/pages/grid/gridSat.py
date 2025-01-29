@@ -1,4 +1,6 @@
 import os
+
+import pandas as pd
 from __init__ import *
 from main.SuperClassMoni import CustomFormatter, MoniSat, ch, logger
 from main.uteis import load_page, wait_load_elements
@@ -8,6 +10,8 @@ logger.addHandler(ch)
 
 
 class GridMoniSAT(MoniSat):
+    path_data = os.path.join(os.getcwd(), "data")
+
     def __init__(self):
         super().__init__()
 
@@ -43,10 +47,13 @@ class GridMoniSAT(MoniSat):
             if list_results is True:  # Apenas tira o screenshot da lista completa
                 logger.info("Capturando tela da lista sem filtros...")
                 self.__extract_to_list()
+                self._get_data_of_grid()
+
             elif isinstance(
                 list_results, dict
             ):  # Preenche os campos e tira o screenshot
                 self.__extract_to_list(**list_results)
+                self._get_data_of_grid()
 
         except Exception as e:
             logger.error(f"Erro durante a extração: {str(e)}")
@@ -102,6 +109,61 @@ class GridMoniSAT(MoniSat):
             screenshot_path = os.path.join(os.getcwd(), "cards", f"LISTA_GRID.png")
             div_list.screenshot(path=screenshot_path)
             logger.info("Screenshot saved as LISTA_GRID.png")
+
+    def _get_data_of_grid(self):
+        print(">> Iterando sobre dados de grids...")
+        lines_of_table = self.page_monisat.query_selector_all(
+            '//*[@id="tableGridGeral"]/tbody/tr'
+        )
+        campos = [
+            "placa",
+            "carreta",
+            "reboque",
+            "situacao_veiculo",
+            "motorista",
+            "posicao",
+            "localizacao",
+            "rota",
+            "situacao_viagem",
+            "situacao_viagem_per",
+            "tempo_ate_destino",
+            "situacao_geral",
+            "km_ate_destino",
+            "operacao",
+            "total_parado_dia",
+            "sensor_1",
+            "acao",
+            "faixa_1",
+            "bau",
+            "checklist",
+            "velocidade",
+        ]
+        data = []
+        for row_index, row in enumerate(lines_of_table, start=1):
+            row_data = {}
+            for col_index, campo in enumerate(campos, start=1):
+                try:
+                    content = self.page_monisat.query_selector(
+                        f'//*[@id="tableGridGeral"]/tbody/tr[{row_index}]/td[{col_index}]/center'
+                    )
+                    if content:
+                        content_text = content.inner_text().strip()
+                        print(f"{campo} | {content_text}")
+                        row_data[campo] = content_text
+                    else:
+                        print(f"{campo} | ")
+                        row_data[campo] = ""
+                except Exception as e:
+                    print(f"[ERROR] {str(e)} [ERROR]")
+                    continue
+            data.append(row_data)
+            print("=" * 100)
+
+        if data:
+            pd.DataFrame(data).to_csv(f"{self.path_data}/grids.csv", index=False)
+            print("[INFO]>> Dados salvos em grids.csv [INFO]")
+        else:
+            print("[INFO]>> Não foi possivel salvar grids.csv [INFO]")
 
 
 if __name__ == "__main__":

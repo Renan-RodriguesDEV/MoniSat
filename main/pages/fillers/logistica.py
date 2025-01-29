@@ -32,21 +32,21 @@ def fill_logistica(
         os.path.join(path_cards, "LOGISTICA_SITUACAO_VIAGEM.png"),
         args_viagem,
     )
-    __option_select_for_logistic()
+    __option_select_for_logistic(page_monisat)
     situacao_veiculo(
         page_monisat,
         os.path.join(path_cards, "LOGISTICA_SITUACAO_VEICULO.png"),
         args_veiculo.get("pesquisa"),
         args_veiculo.get("cadatro"),
     )
-    __option_select_for_logistic()
+    __option_select_for_logistic(page_monisat)
     c_gestor(
         page_monisat,
         os.path.join(path_cards, "LOGISTICA_C_GESTOR.png"),
         args_gestor.get("pesquisa"),
         args_gestor.get("cadastro"),
     )
-    __option_select_for_logistic()
+    __option_select_for_logistic(page_monisat)
     c_reboque(
         page_monisat,
         os.path.join(path_cards, "LOGISTICA_C_REBOQUE.png"),

@@ -1,4 +1,6 @@
 import os
+
+import pandas as pd
 from main.uteis import load_page, wait_load_elements
 from main.SuperClassMoni import CustomFormatter, ch, logger
 
@@ -6,6 +8,7 @@ ch.setFormatter(CustomFormatter())
 logger.addHandler(ch)
 
 path_cards = os.path.join(os.getcwd(), "cards")
+path_data = os.path.join(os.getcwd(), "data")
 
 
 def fill_pontos(
@@ -65,3 +68,43 @@ def fill_pontos(
     card.screenshot(path=os.path.join(path_cards, "TABLE_PONTOS.png"))
     if cadastrar:
         logger.info("Cadastrando pontos...")
+    get_data_of_pontos(page_monisat)
+
+
+def get_data_of_pontos(page):
+    print(">> Iterando sobre dados de pontos...")
+    lines_of_table = page.query_selector_all('//*[@id="tablePonto"]/tbody/tr')
+    campos = [
+        "#",
+        "ponto",
+        "cidade",
+        "cnpj",
+        "tipo",
+        "raio",
+    ]
+    data = []
+    for row_index, row in enumerate(lines_of_table, start=1):
+        row_data = {}
+        for col_index, campo in enumerate(campos, start=1):
+            try:
+                content = page.query_selector(
+                    f'//*[@id="tablePonto"]/tbody/tr[{row_index}]/td[{col_index}]/center'
+                )
+                if content:
+                    content_text = content.text_content().strip()
+                    print(f"{campo} | {content_text}")
+                    row_data[campo] = content_text
+                else:
+                    print(f"{campo} | ")
+                    row_data[campo] = ""
+            except Exception as e:
+                print(f"[ERROR] {str(e)} [ERROR]")
+                continue
+        data.append(row_data)
+        print("=" * 100)
+
+    if data:
+        pd.DataFrame(data).to_csv(f"{path_data}/pontos.csv", index=False)
+        print("[INFO]>> Dados salvos em pontos.csv [INFO]")
+    else:
+        print("[INFO]>> Não foi possivel salvar pontos.csv [INFO]")

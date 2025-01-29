@@ -1,4 +1,6 @@
 import os
+
+import pandas as pd
 from main.uteis import load_page, wait_load_elements
 from main.SuperClassMoni import CustomFormatter, ch, logger
 
@@ -6,6 +8,7 @@ ch.setFormatter(CustomFormatter())
 logger.addHandler(ch)
 
 path_cards = os.path.join(os.getcwd(), "cards")
+path_data = os.path.join(os.getcwd(), "data")
 
 
 def fill_reboque(
@@ -67,3 +70,48 @@ def fill_reboque(
             "#conteudoPagina > div > div > div > div > div > div.float-right > a > button"
         )
         page_monisat.click(save_selector)
+
+    get_data_of_reboques(page_monisat)
+
+
+def get_data_of_reboques(page):
+    print(">> Iterando sobre dados de reboques...")
+    lines_of_table = page.query_selector_all('//*[@id="tablesemreb"]/tbody/tr')
+    campos = [
+        "placa_reboque",
+        "chassi",
+        "renavam",
+        "sub_categoria",
+        "marca",
+        "consulta",
+        "validade",
+        "status",
+        "referencia",
+        "acao",
+    ]
+    data = []
+    for row_index, row in enumerate(lines_of_table, start=1):
+        row_data = {}
+        for col_index, campo in enumerate(campos, start=1):
+            try:
+                content = page.query_selector(
+                    f'//*[@id="tablesemreb"]/tbody/tr[{row_index}]/td[{col_index}]/center'
+                )
+                if content:
+                    content_text = content.text_content().strip()
+                    print(f"{campo} | {content_text}")
+                    row_data[campo] = content_text
+                else:
+                    print(f"{campo} | ")
+                    row_data[campo] = ""
+            except Exception as e:
+                print(f"[ERROR] {str(e)} [ERROR]")
+                continue
+        data.append(row_data)
+        print("=" * 100)
+
+    if data:
+        pd.DataFrame(data).to_csv(f"{path_data}/reboques.csv", index=False)
+        print("[INFO]>> Dados salvos em reboques.csv [INFO]")
+    else:
+        print("[INFO]>> Não foi possivel salvar reboques.csv [INFO]")

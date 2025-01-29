@@ -1,4 +1,6 @@
 import os
+
+import pandas as pd
 from main.uteis import load_page, wait_load_elements
 from main.SuperClassMoni import CustomFormatter, ch, logger
 
@@ -6,6 +8,7 @@ ch.setFormatter(CustomFormatter())
 logger.addHandler(ch)
 
 path_cards = os.path.join(os.getcwd(), "cards")
+path_data = os.path.join(os.getcwd(), "data")
 
 
 def fill_iscas(
@@ -66,3 +69,45 @@ def fill_iscas(
             "#conteudoPagina > div > div > div > div > div > div.float-right > a > button"
         )
         page_monisat.click(save_selector)
+
+    get_data_of_iscas(page_monisat)
+
+
+def get_data_of_iscas(page):
+    print(">> Iterando sobre dados de iscas...")
+    lines_of_table = page.query_selector_all('//*[@id="tableIsca"]/tbody/tr')
+    campos = [
+        "nome",
+        "marca",
+        "site",
+        "telefone",
+        "login",
+        "senha",
+        "obs",
+    ]
+    data = []
+    for row_index, row in enumerate(lines_of_table, start=1):
+        row_data = {}
+        for col_index, campo in enumerate(campos, start=1):
+            try:
+                content = page.query_selector(
+                    f'//*[@id="tableIsca"]/tbody/tr[{row_index}]/td[{col_index}]/center'
+                )
+                if content:
+                    content_text = content.text_content().strip()
+                    print(f"{campo} | {content_text}")
+                    row_data[campo] = content_text
+                else:
+                    print(f"{campo} | ")
+                    row_data[campo] = ""
+            except Exception as e:
+                print(f"[ERROR] {str(e)} [ERROR]")
+                continue
+        data.append(row_data)
+        print("=" * 100)
+
+    if data:
+        pd.DataFrame(data).to_csv(f"{path_data}/iscas.csv", index=False)
+        print("[INFO]>> Dados salvos em iscas.csv [INFO]")
+    else:
+        print("[INFO]>> Não foi possivel salvar iscas.csv [INFO]")
