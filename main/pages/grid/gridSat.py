@@ -111,7 +111,7 @@ class GridMoniSAT(MoniSat):
             logger.info("Screenshot saved as LISTA_GRID.png")
 
     def _get_data_of_grid(self):
-        print(">> Iterando sobre dados de grids...")
+        logger.info(">> Iterando sobre dados de grids...")
         lines_of_table = self.page_monisat.query_selector_all(
             '//*[@id="tableGridGeral"]/tbody/tr'
         )
@@ -148,22 +148,26 @@ class GridMoniSAT(MoniSat):
                     )
                     if content:
                         content_text = content.inner_text().strip()
-                        print(f"{campo} | {content_text}")
+                        logger.info(f">> Antes da formatação: {campo} | {content_text}")
+                        pos_replace = content_text.find("&MM")
+                        content_text = content_text[:pos_replace]
+
+                        logger.info(f"Pós formatação: {campo} | {content_text}")
                         row_data[campo] = content_text
                     else:
-                        print(f"{campo} | ")
+                        logger.info(f"{campo} | ")
                         row_data[campo] = ""
                 except Exception as e:
-                    print(f"[ERROR] {str(e)} [ERROR]")
+                    logger.info(f"[ERROR] {str(e)} [ERROR]")
                     continue
             data.append(row_data)
             print("=" * 100)
 
         if data:
             pd.DataFrame(data).to_csv(f"{self.path_data}/grids.csv", index=False)
-            print("[INFO]>> Dados salvos em grids.csv [INFO]")
+            logger.info("[INFO]>> Dados salvos em grids.csv [INFO]")
         else:
-            print("[INFO]>> Não foi possivel salvar grids.csv [INFO]")
+            logger.info("[INFO]>> Não foi possivel salvar grids.csv [INFO]")
 
 
 if __name__ == "__main__":
