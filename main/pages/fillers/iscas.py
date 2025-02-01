@@ -107,7 +107,9 @@ def get_data_of_iscas(page):
         print("=" * 100)
 
     if data:
-        pd.DataFrame(data).to_csv(f"{path_data}/iscas.csv", index=False)
+        df = pd.DataFrame(data)
+        df.drop("acao", axis=1, inplace=True, errors="ignore")
+        df.to_csv(f"{path_data}/iscas.csv", index=False)
         print("[INFO]>> Dados salvos em iscas.csv [INFO]")
     else:
         print("[INFO]>> Não foi possivel salvar iscas.csv [INFO]")

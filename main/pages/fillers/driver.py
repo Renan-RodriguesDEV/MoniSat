@@ -137,7 +137,9 @@ def get_data_of_drivers(page):
         print("=" * 100)
 
     if data:
-        pd.DataFrame(data).to_csv(f"{path_data}/drivers.csv", index=False)
+        df = pd.DataFrame(data)
+        df.drop("acao", axis=1, inplace=True, errors="ignore")
+        df.to_csv(f"{path_data}/drivers.csv", index=False)
         print("[INFO]>> Dados salvos em drivers.csv [INFO]")
     else:
         print("[INFO]>> Não foi possivel salvar drivers.csv [INFO]")

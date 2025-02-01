@@ -148,7 +148,9 @@ def get_data_of_cars(page):
         print("=" * 100)
 
     if data:
-        pd.DataFrame(data).to_csv(f"{path_data}/cars.csv", index=False)
+        df = pd.DataFrame(data)
+        df.drop("acao", axis=1, inplace=True, errors="ignore")
+        df.to_csv(f"{path_data}/cars.csv", index=False)
         print("[INFO]>> Data saved in drivers.csv [INFO]")
     else:
         print("[INFO]>> Unable to save data [INFO]")

@@ -104,7 +104,9 @@ def get_data_of_pontos(page):
         print("=" * 100)
 
     if data:
-        pd.DataFrame(data).to_csv(f"{path_data}/pontos.csv", index=False)
+        df = pd.DataFrame(data)
+        df.drop(["acao", "#"], axis=1, inplace=True, errors="ignore")
+        df.to_csv(f"{path_data}/pontos.csv", index=False)
         print("[INFO]>> Dados salvos em pontos.csv [INFO]")
     else:
         print("[INFO]>> Não foi possivel salvar pontos.csv [INFO]")
