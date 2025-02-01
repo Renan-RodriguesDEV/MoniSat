@@ -111,7 +111,9 @@ def get_data_of_reboques(page):
         print("=" * 100)
 
     if data:
-        pd.DataFrame(data).to_csv(f"{path_data}/reboques.csv", index=False)
+        df = pd.DataFrame(data)
+        df.drop("acao", axis=1, inplace=True, errors="ignore")
+        df.to_csv(f"{path_data}/reboques.csv", index=False)
         print("[INFO]>> Dados salvos em reboques.csv [INFO]")
     else:
         print("[INFO]>> Não foi possivel salvar reboques.csv [INFO]")

@@ -87,7 +87,9 @@ def get_data_of_retrogramas(page):
         print("=" * 100)
 
     if data:
-        pd.DataFrame(data).to_csv(f"{path_data}/retrogramas.csv", index=False)
+        df = pd.DataFrame(data)
+        df.drop(["acao",'#'], axis=1, inplace=True,errors='ignore')
+        df.to_csv(f"{path_data}/retrogramas.csv", index=False)
         print("[INFO]>> Dados salvos em retrogramas.csv [INFO]")
     else:
         print("[INFO]>> Não foi possivel salvar retrogramas.csv [INFO]")

@@ -245,7 +245,7 @@ if __name__ == "__main__":
             # "categoria": "Carga",
             # "rastreador": "Sim",
         }
-        handler.process_cadastro(params_driver=params_driver)
+        handler.process_cadastro()
     except Exception as e:
         logger.error(f"Erro na execução do script: {str(e)}")
         handler.page_monisat.pause()
