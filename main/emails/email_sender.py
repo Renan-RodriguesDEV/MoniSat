@@ -49,8 +49,11 @@ def send_email(
 
 
 def __send_email(_from, _to, passwd, email_message):
+    # with smtplib.SMTP("smtp-mail.outlook.com", 587) as smtp_server: #TODO: envios com outlook.com
     with smtplib.SMTP("smtp.gmail.com", 587) as smtp_server:
-        print(f'>> {time.strftime('%X')} subindo o servidor de email de: "{_from}"\n')
+        print(
+            f'>> {time.strftime('%X')} subindo o servidor de email de: "{_from} - {passwd}"\n'
+        )
         smtp_server.starttls()
         smtp_server.login(_from, passwd)
         smtp_server.sendmail(_from, _to, email_message)
