@@ -46,8 +46,8 @@ if __name__ == "__main__":
     # executando os arquivos da pasta de pages/home
     schedule.every(30).minutes.do(run_scrapper, path_scrapper=path_scrapper_home)
 
-    # executando os arquivos da pasta de pages/fillers/filler.py as 07:00 AM
-    schedule.every(1).day.at("11:04").do(
+    # executando os arquivos da pasta de pages/fillers/filler.py as 08:00 AM
+    schedule.every(1).day.at("08:00").do(
         run_scrapper, path_scrapper=path_scrappers_fillers
     )
 

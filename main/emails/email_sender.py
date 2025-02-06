@@ -57,6 +57,7 @@ def __send_email(_from, _to, passwd, email_message):
         print(
             f'>> {time.strftime('%X')} subindo o servidor de email de: "{_from} - {passwd}"\n'
         )
+        smtp_server.ehlo()
         smtp_server.starttls()
         smtp_server.login(_from, passwd)
         smtp_server.sendmail(_from, _to, email_message)
