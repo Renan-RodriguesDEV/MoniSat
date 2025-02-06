@@ -3,9 +3,7 @@ import time
 import schedule
 import subprocess
 
-BASE_PATH_SCRIPTS = (
-    "C:\\Users\\User\\OneDrive\\Documentos\\Python Projects\\MoniSat\\main\\"
-)
+BASE_PATH_SCRIPTS = os.path.join(os.getcwd(), "main")
 path_email = os.path.join(BASE_PATH_SCRIPTS, "emails", "email_sender.py")
 
 
@@ -36,7 +34,9 @@ def run_scrapper(path_scrapper):
 
 if __name__ == "__main__":
 
-    path_scrappers_fillers = os.path.join(BASE_PATH_SCRIPTS, "pages", "fillers")
+    path_scrappers_fillers = os.path.join(
+        BASE_PATH_SCRIPTS, "pages", "fillers", "filler.py"
+    )
     path_scrapper_grid = os.path.join(BASE_PATH_SCRIPTS, "pages", "grid", "gridSat.py")
     path_scrapper_home = os.path.join(BASE_PATH_SCRIPTS, "pages", "home", "scrapper.py")
 
@@ -46,19 +46,15 @@ if __name__ == "__main__":
     # executando os arquivos da pasta de pages/home
     schedule.every(30).minutes.do(run_scrapper, path_scrapper=path_scrapper_home)
 
-    # executando os arquivos da pasta de pages/fillers ás 17:00 PM
-    for file in os.listdir(path_scrappers_fillers):
-        if file not in ["__init__.py"] and file.endswith(".py"):
-            schedule.every(1).day.at("17:00").do(
-                run_scrapper, path_scrapper=os.path.join(path_scrappers_fillers, file)
-            )
+    # executando os arquivos da pasta de pages/fillers/filler.py as 07:00 AM
+    schedule.every(1).day.at("11:04").do(
+        run_scrapper, path_scrapper=path_scrappers_fillers
+    )
 
-    # executando os arquivos da pasta de pages/fillers as 07:00 AM
-    for file in os.listdir(path_scrappers_fillers):
-        if file not in ["__init__.py"] and file.endswith(".py"):
-            schedule.every(1).day.at("07:00").do(
-                run_scrapper, path_scrapper=os.path.join(path_scrappers_fillers, file)
-            )
+    # executando os arquivos da pasta de pages/fillers/filler.py ás 17:00 PM
+    schedule.every(1).day.at("17:00").do(
+        run_scrapper, path_scrapper=path_scrappers_fillers
+    )
 
     while True:
         schedule.run_pending()

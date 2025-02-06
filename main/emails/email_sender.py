@@ -34,17 +34,20 @@ def send_email(
 
     for file in os.listdir(dir_files):
         print(f">> {time.strftime('%X')} Acessando os arquivos em {dir_files}\n")
-        with open(os.path.join(dir_files, file), "rb") as f:
-            attachment = MIMEBase("application", "octet-stream")
-            attachment.set_payload(f.read())
-            encoders.encode_base64(attachment)
+        if file in ["grids.csv", "drivers.csv", "cars.csv"]:
+            with open(os.path.join(dir_files, file), "rb") as f:
+                attachment = MIMEBase("application", "octet-stream")
+                attachment.set_payload(f.read())
+                encoders.encode_base64(attachment)
 
-            attachment.add_header(
-                "Content-Disposition",
-                f"attachment; filename={file}",
-            )
-            msg.attach(attachment)
-            print(f'>> {time.strftime('%X')} arquivo adicionado a menssagem "{file}"\n')
+                attachment.add_header(
+                    "Content-Disposition",
+                    f"attachment; filename={file}",
+                )
+                msg.attach(attachment)
+                print(
+                    f'>> {time.strftime('%X')} arquivo adicionado a menssagem "{file}"\n'
+                )
     __send_email(_from, _to, passwd, msg.as_string())
 
 
