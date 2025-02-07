@@ -8,6 +8,20 @@ from main.emails.email_sender import send_email, from_address, to_address, passw
 BASE_PATH_SCRIPTS = os.path.join(os.getcwd(), "main")
 
 
+def verify_hours(func):
+    def wrapper(*args, **kwargs):
+        current_hour = datetime.datetime.now().hour
+        if 18 >= current_hour >= 8:
+            return func(*args, **kwargs)
+        else:
+            print(
+                f"Script não executado pois não estão dentro das horas de operação (8:00 - 18:00)"
+            )
+            return None
+
+    return wrapper
+
+
 def sender_emails_for(
     tittle="Grid",
     to_address=to_address,
@@ -39,6 +53,7 @@ def sender_emails_for(
     )
 
 
+@verify_hours
 def run_scrapper(path_scrapper, tittle="", files=[]):
     if not os.path.exists(path_scrapper):
         print(f'>> {time.strftime('%X')} Arquivo inexistente "{path_scrapper}"')
