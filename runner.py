@@ -1,18 +1,24 @@
 import os
 import time
-from typing import Literal
 import schedule
 import subprocess
 import datetime
-from main.emails.email_sender import send_email,from_address,to_address,password
+from main.emails.email_sender import send_email, from_address, to_address, password
 
 BASE_PATH_SCRIPTS = os.path.join(os.getcwd(), "main")
 
-def sender_emails_for(tittle='Grid',to_address=to_address,password=password,from_address=from_address,files=[]):
+
+def sender_emails_for(
+    tittle="Grid",
+    to_address=to_address,
+    password=password,
+    from_address=from_address,
+    files=[],
+):
     body = f"""
     <html>
         <body>
-            <p>Prezado(a), {from_address}</p>
+            <p>Prezado(a), {to_address}</p>
             <p>Segue em anexo os dados solicitados em formato <b>.csv</b>.</p>
             <p>Atenciosamente,</p>
             <p>Equipe VJBots <span color='red'>({datetime.datetime.now().strftime( "%d/%m/%Y, %H:%M")})</span></p>
@@ -33,8 +39,7 @@ def sender_emails_for(tittle='Grid',to_address=to_address,password=password,from
     )
 
 
-
-def run_scrapper(path_scrapper,tittle:Literal['Veiculos/Motoristas','Grid'],files=[]):
+def run_scrapper(path_scrapper, tittle="", files=[]):
     if not os.path.exists(path_scrapper):
         print(f'>> {time.strftime('%X')} Arquivo inexistente "{path_scrapper}"')
         return
@@ -43,7 +48,7 @@ def run_scrapper(path_scrapper,tittle:Literal['Veiculos/Motoristas','Grid'],file
         print(
             f'>> {time.strftime("%X")} Arquivo executado com sucesso ({path_scrapper})'
         )
-        sender_emails_for(tittle,files=files)
+        sender_emails_for(tittle, files=files)
     except Exception as e:
         print(f">> {time.strftime('%X')} {str(e)}")
 
@@ -57,19 +62,30 @@ if __name__ == "__main__":
     path_scrapper_home = os.path.join(BASE_PATH_SCRIPTS, "pages", "home", "scrapper.py")
 
     # executando os arquivos da pasta de pages/grid
-    schedule.every(30).minutes.do(run_scrapper, path_scrapper=path_scrapper_grid,tittle='Grid',files=['grids.csv'])
+    schedule.every(30).minutes.do(
+        run_scrapper,
+        path_scrapper=path_scrapper_grid,
+        tittle="Grid",
+        files=["grids.csv"],
+    )
 
-    # executando os arquivos da pasta de pages/home
-    schedule.every(30).minutes.do(run_scrapper, path_scrapper=path_scrapper_home,tittle='Veiculos/Motoristas',files=['cars.csv','drivers.csv'])
+    # # executando os arquivos da pasta de pages/home (TODO: á implementar...)
+    # schedule.every(30).minutes.do(run_scrapper, path_scrapper=path_scrapper_home,tittle='Home',files=['home.csv'])
 
     # executando os arquivos da pasta de pages/fillers/filler.py as 08:00 AM
     schedule.every(1).day.at("08:00").do(
-        run_scrapper, path_scrapper=path_scrappers_fillers
+        run_scrapper,
+        path_scrapper=path_scrappers_fillers,
+        tittle="Veiculos/Motoristas",
+        files=["cars.csv", "drivers.csv"],
     )
 
     # executando os arquivos da pasta de pages/fillers/filler.py ás 17:00 PM
     schedule.every(1).day.at("17:00").do(
-        run_scrapper, path_scrapper=path_scrappers_fillers
+        run_scrapper,
+        path_scrapper=path_scrappers_fillers,
+        tittle="Veiculos/Motoristas",
+        files=["cars.csv", "drivers.csv"],
     )
 
     while True:
