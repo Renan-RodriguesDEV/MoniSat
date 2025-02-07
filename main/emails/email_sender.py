@@ -19,6 +19,7 @@ def send_email(
     _to=to_address,
     passwd=password,
     dir_files=os.path.join(os.getcwd(), "data"),
+    files: list = [],
 ):
     msg = MIMEMultipart()
 
@@ -34,7 +35,7 @@ def send_email(
 
     for file in os.listdir(dir_files):
         print(f">> {time.strftime('%X')} Acessando os arquivos em {dir_files}\n")
-        if file in ["grids.csv", "drivers.csv", "cars.csv"]:
+        if files and file in files:
             with open(os.path.join(dir_files, file), "rb") as f:
                 attachment = MIMEBase("application", "octet-stream")
                 attachment.set_payload(f.read())
@@ -79,9 +80,11 @@ if __name__ == "__main__":
     """
     print(f">> INFO: Inicializando o arquivo Python {__file__}, aguarde a execução\n")
     send_email(
+        subject="Email automatico MoniSat (Veiculos)",
         body=body,
         _from=from_address,
         _to=to_address,
         passwd=password,
         dir_files=os.path.join(os.getcwd(), "data"),
+        files=["cars.csv"],
     )

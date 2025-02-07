@@ -1,24 +1,40 @@
 import os
 import time
+from typing import Literal
 import schedule
 import subprocess
+import datetime
+from main.emails.email_sender import send_email,from_address,to_address,password
 
 BASE_PATH_SCRIPTS = os.path.join(os.getcwd(), "main")
-path_email = os.path.join(BASE_PATH_SCRIPTS, "emails", "email_sender.py")
+
+def sender_emails_for(tittle='Grid',to_address=to_address,password=password,from_address=from_address,files=[]):
+    body = f"""
+    <html>
+        <body>
+            <p>Prezado(a), {from_address}</p>
+            <p>Segue em anexo os dados solicitados em formato <b>.csv</b>.</p>
+            <p>Atenciosamente,</p>
+            <p>Equipe VJBots <span color='red'>({datetime.datetime.now().strftime( "%d/%m/%Y, %H:%M")})</span></p>
+            <a href='https://vjbots.com.br'>VJBots Technologies</a>
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqXDLqIQoEeMb2QzO_CGQkr85wOX75Zgcjeg&s" alt="VJBots Icon" style="width:50px;height:50px;">
+        </body>
+    </html>
+    """
+    print(f">> INFO: Inicializando o arquivo Python {__file__}, aguarde a execução\n")
+    send_email(
+        subject=f"Email automatico MoniSat ({tittle})",
+        body=body,
+        _from=from_address,
+        _to=to_address,
+        passwd=password,
+        dir_files=os.path.join(os.getcwd(), "data"),
+        files=files,
+    )
 
 
-def run_email(path_email):
-    if not os.path.exists(path_email):
-        print(f'>> {time.strftime('%X')} Arquivo inexistente "{path_email}"')
-        return
-    try:
-        subprocess.run(["python", path_email])
-        print(f'>> {time.strftime("%X")} Arquivo executado com sucesso ({path_email})')
-    except Exception as e:
-        print(f">> {time.strftime('%X')} {str(e)}")
 
-
-def run_scrapper(path_scrapper):
+def run_scrapper(path_scrapper,tittle:Literal['Veiculos/Motoristas','Grid'],files=[]):
     if not os.path.exists(path_scrapper):
         print(f'>> {time.strftime('%X')} Arquivo inexistente "{path_scrapper}"')
         return
@@ -27,7 +43,7 @@ def run_scrapper(path_scrapper):
         print(
             f'>> {time.strftime("%X")} Arquivo executado com sucesso ({path_scrapper})'
         )
-        run_email(path_email)
+        sender_emails_for(tittle,files=files)
     except Exception as e:
         print(f">> {time.strftime('%X')} {str(e)}")
 
@@ -41,10 +57,10 @@ if __name__ == "__main__":
     path_scrapper_home = os.path.join(BASE_PATH_SCRIPTS, "pages", "home", "scrapper.py")
 
     # executando os arquivos da pasta de pages/grid
-    schedule.every(30).minutes.do(run_scrapper, path_scrapper=path_scrapper_grid)
+    schedule.every(30).minutes.do(run_scrapper, path_scrapper=path_scrapper_grid,tittle='Grid',files=['grids.csv'])
 
     # executando os arquivos da pasta de pages/home
-    schedule.every(30).minutes.do(run_scrapper, path_scrapper=path_scrapper_home)
+    schedule.every(30).minutes.do(run_scrapper, path_scrapper=path_scrapper_home,tittle='Veiculos/Motoristas',files=['cars.csv','drivers.csv'])
 
     # executando os arquivos da pasta de pages/fillers/filler.py as 08:00 AM
     schedule.every(1).day.at("08:00").do(
