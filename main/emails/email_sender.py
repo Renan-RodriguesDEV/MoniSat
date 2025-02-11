@@ -69,7 +69,7 @@ if __name__ == "__main__":
     body = f"""
     <html>
         <body>
-            <p>Prezado(a), {from_address}</p>
+            <p>Prezado(a), {to_address}</p>
             <p>Segue em anexo os dados solicitados em formato <b>.csv</b>.</p>
             <p>Atenciosamente,</p>
             <p>Equipe VJBots <span color='red'>({datetime.datetime.now().strftime( "%d/%m/%Y, %H:%M")})</span></p>
@@ -86,5 +86,5 @@ if __name__ == "__main__":
         _to=to_address,
         passwd=password,
         dir_files=os.path.join(os.getcwd(), "data"),
-        files=["cars.csv"],
+        files=["reboques.csv"],
     )
