@@ -92,7 +92,7 @@ if __name__ == "__main__":
         run_scrapper,
         path_scrapper=path_scrappers_fillers,
         tittle="Veiculos/Motoristas",
-        files=["cars.csv", "drivers.csv"],
+        files=["cars.csv", "drivers.csv", "reboques.csv"],
     )
 
     # executando os arquivos da pasta de pages/fillers/filler.py ás 17:00 PM
@@ -100,7 +100,7 @@ if __name__ == "__main__":
         run_scrapper,
         path_scrapper=path_scrappers_fillers,
         tittle="Veiculos/Motoristas",
-        files=["cars.csv", "drivers.csv"],
+        files=["cars.csv", "drivers.csv", "reboques.csv"],
     )
 
     while True:
