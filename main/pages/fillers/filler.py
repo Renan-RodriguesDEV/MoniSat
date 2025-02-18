@@ -230,6 +230,7 @@ class CadMoniSAT(MoniSat):
 if __name__ == "__main__":
     handler = CadMoniSAT()
     try:
+
         params_driver = {
             # "nome": "João Silva",
             # "rg": "123456789",

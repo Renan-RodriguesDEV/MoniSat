@@ -1,6 +1,7 @@
 import os
 
 import pandas as pd
+from playwright.sync_api import Page
 from main.uteis import load_page, wait_load_elements
 from main.SuperClassMoni import CustomFormatter, ch, logger
 
@@ -24,6 +25,7 @@ def fill_driver(
     status="",
     referencia="",
     cadastrar=False,
+    telefones=True,
 ):
     data_cadastro = {
         "nome": nome,
@@ -143,3 +145,5 @@ def get_data_of_drivers(page):
         print("[INFO]>> Dados salvos em drivers.csv [INFO]")
     else:
         print("[INFO]>> Não foi possivel salvar drivers.csv [INFO]")
+
+

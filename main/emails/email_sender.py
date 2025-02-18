@@ -47,7 +47,7 @@ def send_email(
                 )
                 msg.attach(attachment)
                 print(
-                    f'>> {time.strftime('%X')} arquivo adicionado a menssagem "{file}"\n'
+                    f'>> {time.strftime("%X")} arquivo adicionado a menssagem "{file}"\n'
                 )
     __send_email(_from, _to, passwd, msg.as_string())
 
@@ -56,13 +56,13 @@ def __send_email(_from, _to, passwd, email_message):
     # with smtplib.SMTP("smtp-mail.outlook.com", 587) as smtp_server: #TODO: envios com outlook.com
     with smtplib.SMTP("smtp.gmail.com", 587) as smtp_server:
         print(
-            f'>> {time.strftime('%X')} subindo o servidor de email de: "{_from} - {passwd}"\n'
+            f""">> {time.strftime('%X')} subindo o servidor de email de: "{_from} - {passwd}"\n"""
         )
         smtp_server.ehlo()
         smtp_server.starttls()
         smtp_server.login(_from, passwd)
         smtp_server.sendmail(_from, _to, email_message)
-    print(f'>> {time.strftime('%X')} email enviado para: "{_to}\n')
+    print(f""">> {time.strftime('%X')} email enviado para: "{_to}\n""")
 
 
 if __name__ == "__main__":
