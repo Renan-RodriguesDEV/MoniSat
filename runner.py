@@ -56,7 +56,7 @@ def sender_emails_for(
 @verify_hours
 def run_scrapper(path_scrapper, tittle="", files=[]):
     if not os.path.exists(path_scrapper):
-        print(f'>> {time.strftime('%X')} Arquivo inexistente "{path_scrapper}"')
+        print(f'>> {time.strftime("%X")} Arquivo inexistente "{path_scrapper}"')
         return
     try:
         subprocess.run(["python", path_scrapper])
@@ -69,9 +69,12 @@ def run_scrapper(path_scrapper, tittle="", files=[]):
 
 
 if __name__ == "__main__":
-
+    files = ["cars.csv", "drivers.csv", "reboques.csv"]
     path_scrappers_fillers = os.path.join(
         BASE_PATH_SCRIPTS, "pages", "fillers", "filler.py"
+    )
+    path_scrappers_phones = os.path.join(
+        BASE_PATH_SCRIPTS, "pages", "fillers", "phones.py"
     )
     path_scrapper_grid = os.path.join(BASE_PATH_SCRIPTS, "pages", "grid", "gridSat.py")
     path_scrapper_home = os.path.join(BASE_PATH_SCRIPTS, "pages", "home", "scrapper.py")
@@ -87,20 +90,33 @@ if __name__ == "__main__":
     # # executando os arquivos da pasta de pages/home (TODO: á implementar...)
     # schedule.every(30).minutes.do(run_scrapper, path_scrapper=path_scrapper_home,tittle='Home',files=['home.csv'])
 
+    # executando os arquivos da pasta de pages/fillers/phones.py ás 07:30 AM
+    schedule.every(1).day.at("07:30").do(
+        run_scrapper,
+        path_scrapper=path_scrappers_phones,
+        tittle="Telefones",
+        files=["phones.csv"],
+    )
     # executando os arquivos da pasta de pages/fillers/filler.py as 08:00 AM
     schedule.every(1).day.at("08:00").do(
         run_scrapper,
         path_scrapper=path_scrappers_fillers,
         tittle="Veiculos/Motoristas",
-        files=["cars.csv", "drivers.csv", "reboques.csv"],
+        files=files,
     )
-
+    # executando os arquivos da pasta de pages/fillers/phones.py ás 16:30 PM
+    schedule.every(1).day.at("16:30").do(
+        run_scrapper,
+        path_scrapper=path_scrappers_phones,
+        tittle="Telefones",
+        files=["phones.csv"],
+    )
     # executando os arquivos da pasta de pages/fillers/filler.py ás 17:00 PM
     schedule.every(1).day.at("17:00").do(
         run_scrapper,
         path_scrapper=path_scrappers_fillers,
         tittle="Veiculos/Motoristas",
-        files=["cars.csv", "drivers.csv", "reboques.csv"],
+        files=files,
     )
 
     while True:
