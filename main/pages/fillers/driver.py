@@ -1,6 +1,7 @@
 import os
 
 import pandas as pd
+from playwright.sync_api import Page
 from main.uteis import load_page, wait_load_elements
 from main.SuperClassMoni import CustomFormatter, ch, logger
 
@@ -24,6 +25,7 @@ def fill_driver(
     status="",
     referencia="",
     cadastrar=False,
+    telefones=True,
 ):
     data_cadastro = {
         "nome": nome,
@@ -72,6 +74,7 @@ def fill_driver(
         cad_driver(page_monisat, cpf)
 
     get_data_of_drivers(page_monisat)
+    # get_all_phones(page_monisat)
 
 
 def cad_driver(page, cpf):
@@ -143,3 +146,43 @@ def get_data_of_drivers(page):
         print("[INFO]>> Dados salvos em drivers.csv [INFO]")
     else:
         print("[INFO]>> Não foi possivel salvar drivers.csv [INFO]")
+
+
+def get_all_phones(page: Page):
+    print(">> Iterando sobre telefones de motorista...")
+    list_selector = '//*[@id="tablemot"]/tbody/tr'
+    phone_selector_icon = '//*[@id="tablemot"]/tbody/tr[1]/td[11]/center/a[{}]'
+    phone_number_selector = '//*[@id="listTel"]/div/div[2]/div/div/table/tbody/tr/td[1]'
+    x_element = "#modalDetalhes > div > div > div.modal-header > button"
+    phones, identifiers = [], []
+    for i, _ in enumerate(page.query_selector_all(list_selector)):
+        try:
+            if page.query_selector(phone_selector_icon.format(i)):
+                page.query_selector(phone_selector_icon.format(i)).click()
+                page.wait_for_load_state("networkidle")
+                if page.query_selector(phone_number_selector):
+                    identifier = page.query_selector(
+                        "#modalDetalhesTitulo"
+                    ).text_content()
+                    phone = page.query_selector(phone_number_selector).text_content()
+                    page.query_selector(x_element).click()
+                    phones.append(phone)
+                    identifiers.append(identifier)
+                    print(f"Identificador: {identifier}, Telefone: {phone}")
+                else:
+                    page.query_selector(x_element).click()
+                    print(f"Telefone: Não encontrado")
+                print("=" * 100)
+            else:
+                print(f"Telefone: Não encontrado {phone_selector_icon.format(i)}")
+        except Exception as e:
+            print(f"[ERROR] {str(e)} [ERROR]")
+            continue
+
+    if len(phones) > 0 and len(identifiers) > 0:
+        df = pd.DataFrame({"phones": phones, "indentifiers": identifiers})
+        df.drop("acao", axis=1, inplace=True, errors="ignore")
+        df.to_csv(f"{path_data}/phones.csv", index=False)
+        print("[INFO]>> Dados salvos em phones.csv [INFO]")
+    else:
+        print("[INFO]>> Não foi possivel salvar phones.csv [INFO]")
