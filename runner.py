@@ -91,7 +91,7 @@ if __name__ == "__main__":
     # schedule.every(30).minutes.do(run_scrapper, path_scrapper=path_scrapper_home,tittle='Home',files=['home.csv'])
 
     # executando os arquivos da pasta de pages/fillers/phones.py ás 07:30 AM
-    schedule.every(1).day.at("07:45").do(
+    schedule.every(1).day.at("11:56").do(
         run_scrapper,
         path_scrapper=path_scrappers_phones,
         tittle="Telefones",
