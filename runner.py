@@ -97,8 +97,8 @@ if __name__ == "__main__":
         tittle="Telefones",
         files=["phones.csv"],
     )
-    # executando os arquivos da pasta de pages/fillers/filler.py as 08:00 AM
-    schedule.every(1).day.at("08:00").do(
+    # executando os arquivos da pasta de pages/fillers/filler.py as 08:01 AM
+    schedule.every(1).day.at("08:01").do(
         run_scrapper,
         path_scrapper=path_scrappers_fillers,
         tittle="Veiculos/Motoristas",
@@ -121,4 +121,5 @@ if __name__ == "__main__":
 
     while True:
         schedule.run_pending()
+        print(f'Aguardando o periodo correto!! {datetime.datetime.now()}',end='\r')
         time.sleep(1)
