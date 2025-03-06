@@ -125,5 +125,4 @@ if __name__ == "__main__":
             end="\r",
         )
         schedule.run_pending()
-        print(f'Aguardando o periodo correto!! {datetime.datetime.now()}',end='\r')
         time.sleep(1)
