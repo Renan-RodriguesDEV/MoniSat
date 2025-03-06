@@ -6,6 +6,9 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 import time
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from_address = os.getenv("EMAIL")
 password = os.getenv("PASSWD")

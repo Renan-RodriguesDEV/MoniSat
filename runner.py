@@ -120,5 +120,9 @@ if __name__ == "__main__":
     )
 
     while True:
+        print(
+            f'>> {time.strftime("%X")} aguardando horário correto para envios/scrapper!!',
+            end="\r",
+        )
         schedule.run_pending()
         time.sleep(1)
