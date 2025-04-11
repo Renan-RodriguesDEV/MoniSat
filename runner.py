@@ -78,7 +78,9 @@ if __name__ == "__main__":
     )
     path_scrapper_grid = os.path.join(BASE_PATH_SCRIPTS, "pages", "grid", "gridSat.py")
     path_scrapper_home = os.path.join(BASE_PATH_SCRIPTS, "pages", "home", "scrapper.py")
-
+    path_scrappers_checklist = os.path.join(
+        BASE_PATH_SCRIPTS, "pages", "checklist", "checklist.py"
+    )
     # executando os arquivos da pasta de pages/grid
     schedule.every(30).minutes.do(
         run_scrapper,
@@ -103,6 +105,14 @@ if __name__ == "__main__":
         path_scrapper=path_scrappers_fillers,
         tittle="Veiculos/Motoristas",
         files=files,
+    )
+
+    # executando os arquivos da pasta de pages/fillers/filler.py as 08:01 AM
+    schedule.every(1).day.at("08:06").do(
+        run_scrapper,
+        path_scrapper=path_scrappers_checklist,
+        tittle="Checklist",
+        files=["checklist.csv"],
     )
     # executando os arquivos da pasta de pages/fillers/phones.py ás 16:30 PM
     schedule.every(1).day.at("16:45").do(

@@ -1,5 +1,11 @@
 {
   "files.exclude": {
     "**/__pycache__": true
+  },
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": true,
+    "markdown": true,
+    "scminput": false
   }
 }
