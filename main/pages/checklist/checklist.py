@@ -86,12 +86,18 @@ class Checklist(MoniSat):
             df = pd.DataFrame(data)
             df.drop("operacao", axis=1, inplace=True, errors="ignore")
             df.drop("acao", axis=1, inplace=True, errors="ignore")
+            df.drop("resultado", axis=1, inplace=True, errors="ignore")
             # Limpa e transforma a coluna "validade"
             df["validade"] = df["validade"].map(
                 lambda x: x.lower().replace("dias", "").replace("!", "").strip()
             )
             # Remove linhas onde "validade" é igual a "vencido"
-            df.drop(df[df["validade"] == "vencido"].index, inplace=True, axis=0)
+            df.drop(
+                df[df["validade"] == "vencido"].index,
+                inplace=True,
+                axis=0,
+                errors="ignore",
+            )
             df.to_csv(f"{self.path_data}/checklist.csv", index=False)
             print("[INFO]>> Dados salvos em checklist.csv [INFO]")
         else:
